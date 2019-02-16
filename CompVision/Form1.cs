@@ -14,13 +14,15 @@ namespace CompVision
     {
         private Image image;
         private Bitmap inputImage;
+        private Image.EdgeEffect edgeEffect; 
 
         public Form1()
         {
             InitializeComponent();
             inputImage = new Bitmap(@"C:\Users\Роман\source\repos\CompVision\CompVision\Res\Shrikrishna.bmp");
-            image = new Image(inputImage);
-            SetImage(image, 576, 432);
+            image = new Image(inputImage, edgeEffect);
+            edgeEffect = Image.EdgeEffect.Black;
+            SetImage(image, 576, 432);           
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -38,7 +40,7 @@ namespace CompVision
 
         private void button1_Click(object sender, EventArgs e)
         {
-            image = new Image(inputImage);
+            image = new Image(inputImage, edgeEffect);
             SetImage(image, 576, 432);
         }
 
@@ -52,6 +54,26 @@ namespace CompVision
         {
             ImageConverter.convolution(image, CoreCreator.getGauss(5, 5, 0.5));
             SetImage(image, 576, 432);
+        }
+
+        private void radioButton4_CheckedChanged(object sender, EventArgs e)
+        {
+            image.setEdgeEffect(Image.EdgeEffect.Wrapping);
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            image.setEdgeEffect(Image.EdgeEffect.Mirror);
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            image.setEdgeEffect(Image.EdgeEffect.Repeat);
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            image.setEdgeEffect(Image.EdgeEffect.Black);
         }
     }
 }

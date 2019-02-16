@@ -20,7 +20,7 @@ namespace CompVision
         public Core()
         {
         }
-
+        
         public Core(int widthX, int heightX, double[,] coreX)
         {
             width = widthX;
