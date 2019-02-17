@@ -24,7 +24,7 @@ namespace CompVision
             inputImage = new Bitmap(filePath);
             image = new Image(inputImage, edgeEffect);
             edgeEffect = Image.EdgeEffect.Black;
-            SetImage(image, image.getWidth(), image.getHeight());           
+            SetImage(image, image.Width, image.Height);           
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -48,57 +48,57 @@ namespace CompVision
         private void button1_Click(object sender, EventArgs e)
         {
             image = new Image(inputImage, edgeEffect);
-            SetImage(image, image.getWidth(), image.getHeight());
+            SetImage(image, image.Width, image.Height);
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             ImageConverter.sobel(image);
-            SetImage(image, image.getWidth(), image.getHeight());
+            SetImage(image, image.Width, image.Height);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, CoreCreator.getGauss(5, 5, 0.5));
-            SetImage(image, image.getWidth(), image.getHeight());
+            ImageConverter.convolution(image, KernelCreator.getGauss(5, 5, 0.5));
+            SetImage(image, image.Width, image.Height);
         }
 
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
-            image.setEdgeEffect(Image.EdgeEffect.Wrapping);
+            image._EdgeEffect = Image.EdgeEffect.Wrapping;
         }
 
         private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
-            image.setEdgeEffect(Image.EdgeEffect.Mirror);
+            image._EdgeEffect = Image.EdgeEffect.Mirror;
         }
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
-            image.setEdgeEffect(Image.EdgeEffect.Repeat);
+            image._EdgeEffect = Image.EdgeEffect.Repeat;
         }
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-            image.setEdgeEffect(Image.EdgeEffect.Black);
+            image._EdgeEffect = Image.EdgeEffect.Black;
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, CoreCreator.getBlur());
-            SetImage(image, image.getWidth(), image.getHeight());
+            ImageConverter.convolution(image, KernelCreator.getBlur());
+            SetImage(image, image.Width, image.Height);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, CoreCreator.getClarity());
-            SetImage(image, image.getWidth(), image.getHeight());
+            ImageConverter.convolution(image, KernelCreator.getClarity());
+            SetImage(image, image.Width, image.Height);
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
             ImageConverter.priut(image);
-            SetImage(image, image.getWidth(), image.getHeight());
+            SetImage(image, image.Width, image.Height);
         }
 
         private void button7_Click(object sender, EventArgs e)
@@ -125,7 +125,7 @@ namespace CompVision
 
             inputImage = new Bitmap(filePath);
             image = new Image(inputImage, edgeEffect);
-            SetImage(image, image.getWidth(), image.getHeight());
+            SetImage(image, image.Width, image.Height);
         }
     }
 }

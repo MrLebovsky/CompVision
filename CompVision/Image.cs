@@ -12,13 +12,26 @@ namespace CompVision
         private int height;
         private int width;
         private double[] pixels;
-        public int getHeight()  {return height;}
-        public void setHeight(int value) { height = value; }
-        public int getWidth() {return width;}
-        public void setWidth(int value) { width = value; }
-        public double[] getPixels() {return pixels;}
         public enum EdgeEffect { Black, Repeat, Mirror, Wrapping };
         private EdgeEffect edgeEffect;
+
+        public EdgeEffect _EdgeEffect
+        {
+            get => edgeEffect;
+            set => edgeEffect = value;
+        }
+
+        public int Height
+        {
+            get => height;
+            set => height = value;
+        }
+
+        public int Width
+        {
+            get => width;
+            set => width = value;
+        }
 
         public Image() { }
 
@@ -118,11 +131,6 @@ namespace CompVision
             if (y >= height) y = 1 + (y - height);
 
             return pixels[x + y * width];
-        }
-
-        public void setEdgeEffect(EdgeEffect xEdgeEffect)
-        {
-            edgeEffect = xEdgeEffect;
         }
 
         public Bitmap getOutputImage() {

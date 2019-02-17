@@ -11,23 +11,23 @@ namespace CompVision
     {
         ImageConverter() { }
 
-        public static void convolution(Image image, Core core)
+        public static void convolution(Image image, Kernel kernel)
         {
             Image copyImage = new Image(image);
 
-            for (int i = 0; i < image.getWidth(); i++)
+            for (int i = 0; i < image.Width; i++)
             {
-                for (int j = 0; j < image.getHeight(); j++)
+                for (int j = 0; j < image.Height; j++)
                 {
                     double resultPixel = 0;
-                    for (int x = 0; x < core.getWidth(); x++)
+                    for (int x = 0; x < kernel.width; x++)
                     {
-                        for (int y = 0; y < core.getHeight(); y++)
+                        for (int y = 0; y < kernel.height; y++)
                         {
-                            int realI = i + (x - (core.getWidth() / 2));
-                            int realJ = j + (y - (core.getHeight() / 2));
+                            int realI = i + (x - (kernel.width / 2));
+                            int realJ = j + (y - (kernel.height / 2));
 
-                            resultPixel += copyImage.getPixel(realI, realJ) * core.getCoreAt(x, y);
+                            resultPixel += copyImage.getPixel(realI, realJ) * kernel.getCoreAt(x, y);
                         }
                     }
                     image.setPixel(i, j, resultPixel);
@@ -41,12 +41,12 @@ namespace CompVision
             Image copyImageX = new Image(image);
             Image copyImageY = new Image(image);
 
-            convolution(copyImageX, CoreCreator.getSobelX());
-            convolution(copyImageY, CoreCreator.getSobelY());
+            convolution(copyImageX, KernelCreator.getSobelX());
+            convolution(copyImageY, KernelCreator.getSobelY());
 
-            for (int i = 0; i < image.getWidth(); i++)
+            for (int i = 0; i < image.Width; i++)
             {
-                for (int j = 0; j < image.getHeight(); j++)
+                for (int j = 0; j < image.Height; j++)
                 {
                     double pixelX = copyImageX.getPixel(i, j);
                     double pixelY = copyImageY.getPixel(i, j);
@@ -59,12 +59,12 @@ namespace CompVision
         {
             Image copyImageX = new Image(image);
             Image copyImageY = new Image(image);
-            convolution(copyImageX, CoreCreator.getPriutX());
-            convolution(copyImageY, CoreCreator.getPriutY());
+            convolution(copyImageX, KernelCreator.getPriutX());
+            convolution(copyImageY, KernelCreator.getPriutY());
 
-            for (int i = 0; i < image.getWidth(); i++)
+            for (int i = 0; i < image.Width; i++)
             {
-                for (int j = 0; j < image.getHeight(); j++)
+                for (int j = 0; j < image.Height; j++)
                 {
                     double pixelX = copyImageX.getPixel(i, j);
                     double pixelY = copyImageY.getPixel(i, j);

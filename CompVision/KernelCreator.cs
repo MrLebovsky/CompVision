@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace CompVision
 {
-    class CoreCreator
+    class KernelCreator
     {
-        public CoreCreator() { }
+        public KernelCreator() { }
 
-        public static Core getBlur()
+        public static Kernel getBlur()
         {
             const double koef = 1.0 / 9;
             double[,] core = new double[3, 3] {
@@ -19,51 +19,51 @@ namespace CompVision
                          { koef, koef, koef}
             };
 
-            return new Core(3, 3, core);
+            return new Kernel(3, 3, core);
         }
 
-        public static Core getClarity()
+        public static Kernel getClarity()
         {
             double[,] core = new double[3, 3]{{-1, -1, -1},
                          {-1, 9,  -1},
                          {-1, -1, -1}};
-            return new Core(3, 3, core);
+            return new Kernel(3, 3, core);
         }
 
-        public static Core getSobelX()
+        public static Kernel getSobelX()
         {
             double[,] core = new double[3, 3]{{1, 0, -1},
                          {2, 0, -2},
                          {1, 0, -1}};
 
-            return new Core(3, 3, core);
+            return new Kernel(3, 3, core);
         }
 
-        public static Core getSobelY()
+        public static Kernel getSobelY()
         {
             double[,] core = new double[3, 3]{{1,  2,  1},
                          {0,  0,  0},
                          {-1, -2, -1}};
-            return new Core(3, 3, core);
+            return new Kernel(3, 3, core);
         }
 
-        public static Core getPriutX()
+        public static Kernel getPriutX()
         {
             double[,] core = new double[3, 3]{{1, 0, -1},
                          {1, 0, -1},
                          {1, 0, -1}};
-            return new Core(3, 3, core);
+            return new Kernel(3, 3, core);
         }
 
-        public static Core getPriutY()
+        public static Kernel getPriutY()
         {
             double[,] core = new double[3, 3]{{1,  1,  1},
                          {0,  0,  0},
                          {-1, -1, -1}};
-            return new Core(3, 3, core);
+            return new Kernel(3, 3, core);
         }
 
-        public static Core getGauss(int width, int height, double sigma)
+        public static Kernel getGauss(int width, int height, double sigma)
         {
             // Tmp vars
             double sum = 0.0;
@@ -92,7 +92,7 @@ namespace CompVision
                     core[i, j] /= sum;
                 }
             }
-            return new Core(width, height, core);
+            return new Kernel(width, height, core);
 
         }
     }
