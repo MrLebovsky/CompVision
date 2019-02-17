@@ -14,15 +14,17 @@ namespace CompVision
     {
         private Image image;
         private Bitmap inputImage;
-        private Image.EdgeEffect edgeEffect; 
+        private Image.EdgeEffect edgeEffect;
+        private String filePath;
 
         public Form1()
         {
             InitializeComponent();
-            inputImage = new Bitmap(@"C:\Users\Роман\source\repos\CompVision\CompVision\Res\Shrikrishna.bmp");
+            filePath = @"C:\Users\Роман\source\repos\CompVision\CompVision\Res\Shrikrishna.bmp";
+            inputImage = new Bitmap(filePath);
             image = new Image(inputImage, edgeEffect);
             edgeEffect = Image.EdgeEffect.Black;
-            SetImage(image, 576, 432);           
+            SetImage(image, image.getWidth(), image.getHeight());           
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -32,28 +34,33 @@ namespace CompVision
         public void SetImage(Image xImage, int xSize, int ySize)
         {
             // Stretches the image to fit the pictureBox.
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             image = new Image(xImage);
-            pictureBox1.ClientSize = new Size(xSize, ySize);
             pictureBox1.Image = image.getOutputImage();
         }
 
+        public void SetOldImage()
+        {
+            pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox2.Image = image.getOutputImage();
+        }
+        
         private void button1_Click(object sender, EventArgs e)
         {
             image = new Image(inputImage, edgeEffect);
-            SetImage(image, 576, 432);
+            SetImage(image, image.getWidth(), image.getHeight());
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             ImageConverter.sobel(image);
-            SetImage(image, 576, 432);
+            SetImage(image, image.getWidth(), image.getHeight());
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             ImageConverter.convolution(image, CoreCreator.getGauss(5, 5, 0.5));
-            SetImage(image, 576, 432);
+            SetImage(image, image.getWidth(), image.getHeight());
         }
 
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
@@ -74,6 +81,51 @@ namespace CompVision
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
             image.setEdgeEffect(Image.EdgeEffect.Black);
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            ImageConverter.convolution(image, CoreCreator.getBlur());
+            SetImage(image, image.getWidth(), image.getHeight());
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ImageConverter.convolution(image, CoreCreator.getClarity());
+            SetImage(image, image.getWidth(), image.getHeight());
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            ImageConverter.priut(image);
+            SetImage(image, image.getWidth(), image.getHeight());
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            SetOldImage();
+            this.Size = new System.Drawing.Size(1432, 520);
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            this.Size = new System.Drawing.Size(846, 520);
+        }
+
+        private void выходToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void загрузитьИзображениеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1 = new OpenFileDialog() { Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*" };
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                filePath = openFileDialog1.FileName;
+
+            inputImage = new Bitmap(filePath);
+            image = new Image(inputImage, edgeEffect);
+            SetImage(image, image.getWidth(), image.getHeight());
         }
     }
 }

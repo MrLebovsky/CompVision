@@ -133,6 +133,7 @@ namespace CompVision
                 for (int j = 0; j < height; j++)
                 {
                     double pixel = pixels[i + j * width];
+
                     image.SetPixel(i, j, Color.FromArgb((int)pixel, (int)pixel, (int)pixel));
 
                 }
