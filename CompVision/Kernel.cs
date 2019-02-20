@@ -10,18 +10,18 @@ namespace CompVision
     {   
         public int width { get; set; }
         public int height { get; set; }
-        private double[,] kernel;
-        public double getCoreAt(int x, int y) {return kernel[x,y];}
+        private double[] kernel;
+        public double getkernelAt(int x, int y) {return kernel[x + y * width]; }
 
         public Kernel()
         {
         }
         
-        public Kernel(int widthX, int heightX, double[,] coreX)
+        public Kernel(int widthX, int heightX, double[] kernelX)
         {
             width = widthX;
             height = heightX;
-            kernel = coreX;
+            kernel = kernelX;
         }
     }
 }

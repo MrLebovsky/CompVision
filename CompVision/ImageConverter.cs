@@ -27,13 +27,12 @@ namespace CompVision
                             int realI = i + (x - (kernel.width / 2));
                             int realJ = j + (y - (kernel.height / 2));
 
-                            resultPixel += copyImage.getPixel(realI, realJ) * kernel.getCoreAt(x, y);
+                            resultPixel += copyImage.getPixel(realI, realJ) * kernel.getkernelAt(x, y);
                         }
                     }
                     image.setPixel(i, j, resultPixel);
                 }
             }
-
         }
 
         public static void sobel(Image image)
@@ -69,6 +68,32 @@ namespace CompVision
                     double pixelX = copyImageX.getPixel(i, j);
                     double pixelY = copyImageY.getPixel(i, j);
                     image.setPixel(i, j, Math.Sqrt(pixelX * pixelX + pixelY * pixelY));
+                }
+            }
+        }
+
+        public static void normolize(Image image)
+        {
+            //Normolize
+            double max = image.getPixel(0, 0);
+            double min = image.getPixel(0, 0);
+
+            for (int i = 0; i < image.Width; i++)
+            {
+                for (int j = 0; j < image.Height; j++)
+                {
+                    if (image.getPixel(i, j) > max) max = image.getPixel(i, j);
+                    if (image.getPixel(i, j) < min) min = image.getPixel(i, j);
+                }
+            }
+
+            for (int i = 0; i < image.Width; i++)
+            {
+                for (int j = 0; j < image.Height; j++)
+                {
+                    double pixel = (image.getPixel(i, j) - min) * (255 / (max - min));
+
+                    image.setPixel(i, j, pixel);
                 }
             }
         }

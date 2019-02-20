@@ -13,87 +13,80 @@ namespace CompVision
         public static Kernel getBlur()
         {
             const double koef = 1.0 / 9;
-            double[,] core = new double[3, 3] {
-                { koef, koef, koef},
-                         { koef, koef, koef},
-                         { koef, koef, koef}
+            double[] kernel = new double[9] {
+                          koef, koef, koef,
+                          koef, koef, koef,
+                          koef, koef, koef
             };
 
-            return new Kernel(3, 3, core);
+            return new Kernel(3, 3, kernel);
         }
 
         public static Kernel getClarity()
         {
-            double[,] core = new double[3, 3]{{-1, -1, -1},
-                         {-1, 9,  -1},
-                         {-1, -1, -1}};
-            return new Kernel(3, 3, core);
+            double[] kernel = new double[9]{-1, -1, -1,
+                                             -1, 9,  -1,
+                                             -1, -1, -1};
+            return new Kernel(3, 3, kernel);
         }
 
         public static Kernel getSobelX()
         {
-            double[,] core = new double[3, 3]{{1, 0, -1},
-                         {2, 0, -2},
-                         {1, 0, -1}};
+            double[] kernel = new double[9]{1, 0, -1,
+                                            2, 0, -2,
+                                            1, 0, -1};
 
-            return new Kernel(3, 3, core);
+            return new Kernel(3, 3, kernel);
         }
 
         public static Kernel getSobelY()
         {
-            double[,] core = new double[3, 3]{{1,  2,  1},
-                         {0,  0,  0},
-                         {-1, -2, -1}};
-            return new Kernel(3, 3, core);
+            double[] kernel = new double[9]{1,  2,  1,
+                                             0,  0,  0,
+                                             -1, -2, -1};
+            return new Kernel(3, 3, kernel);
         }
 
         public static Kernel getPriutX()
         {
-            double[,] core = new double[3, 3]{{1, 0, -1},
-                         {1, 0, -1},
-                         {1, 0, -1}};
-            return new Kernel(3, 3, core);
+            double[] kernel = new double[9]{1, 0, -1,
+                                             1, 0, -1,
+                                             1, 0, -1};
+            return new Kernel(3, 3, kernel);
         }
 
         public static Kernel getPriutY()
         {
-            double[,] core = new double[3, 3]{{1,  1,  1},
-                         {0,  0,  0},
-                         {-1, -1, -1}};
-            return new Kernel(3, 3, core);
+            double[] kernel = new double[9]{1,  1,  1,
+                                             0,  0,  0,
+                                             -1, -1, -1};
+            return new Kernel(3, 3, kernel);
         }
 
-        public static Kernel getGauss(int width, int height, double sigma)
+        public static Kernel getGauss(double sigma)
         {
-            // Tmp vars
-            double sum = 0.0;
+            int radius = (int)(2 * (3 * sigma) + 1);
+            if (radius % 2 == 0)
+            {
+                radius++;
+            }
+            double sum = 0;
             double doubleSigma = 2 * sigma * sigma;
-            double mainKoef = 1.0 / (doubleSigma * Math.PI);
-            double halfWidth = width / 2;
-            double halfHeight = height / 2;
+            double mainKoef = 1 / (Math.Sqrt(2 * Math.PI) * sigma);
+            double []core = new double[radius];
 
-            double[,] core = new double[width, height];
-
-            for (int i = 0; i < width; i++)
+            for (int i = 0; i < radius; i++)
             {
-
-                for (int j = 0; j < height; j++)
-                {
-                    core[i, j] = mainKoef * Math.Exp(((i - halfWidth) * (i - halfWidth) + (j - halfHeight) * (j - halfHeight)) *
-                                                (-1.0 / doubleSigma));
-                    sum += core[i, j];
-                }
+                core[i] = mainKoef * Math.Exp(-(Math.Pow(i - (radius / 2), 2)) / doubleSigma);
+                sum += core[i];
             }
-            // Normalize
-            for (int i = 0; i < width; i++)
+
+            for (int i = 0; i < radius; i++)
             {
-                for (int j = 0; j < height; j++)
-                {
-                    core[i, j] /= sum;
-                }
+                core[i] /= sum;
             }
-            return new Kernel(width, height, core);
-
+            return new Kernel(1, radius, core);
         }
+
     }
 }

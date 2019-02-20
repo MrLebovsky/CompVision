@@ -97,8 +97,8 @@ namespace CompVision
         public void setPixel(int x, int y, double pixel)
         {
             // Validation
-            if (pixel < 0) pixel = 0;
-            if (pixel > 255) pixel = 255;
+            //if (pixel < 0) pixel = 0;
+            //if (pixel > 255) pixel = 255;
 
             pixels[x + y * width] = (int)pixel;
         }
@@ -136,11 +136,15 @@ namespace CompVision
         public Bitmap getOutputImage() {
             Bitmap image = new Bitmap(width, height);
 
+
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < height; j++)
                 {
                     double pixel = pixels[i + j * width];
+
+                    if (pixel < 0) pixel = 0;
+                    if (pixel > 255) pixel = 255;
 
                     image.SetPixel(i, j, Color.FromArgb((int)pixel, (int)pixel, (int)pixel));
 

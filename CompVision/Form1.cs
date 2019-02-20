@@ -59,7 +59,8 @@ namespace CompVision
 
         private void button2_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, KernelCreator.getGauss(5, 5, 0.5));
+            ImageConverter.convolution(image, KernelCreator.getGauss(Convert.ToDouble(textBox1.Text)));
+            ImageConverter.normolize(image);
             SetImage(image, image.Width, image.Height);
         }
 
@@ -125,6 +126,30 @@ namespace CompVision
 
             inputImage = new Bitmap(filePath);
             image = new Image(inputImage, edgeEffect);
+            SetImage(image, image.Width, image.Height);
+        }
+
+        private void getSobelXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void getSobelYToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            ImageConverter.convolution(image, KernelCreator.getSobelX());
+            ImageConverter.normolize(image);
+            SetImage(image, image.Width, image.Height);
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            ImageConverter.convolution(image, KernelCreator.getSobelY());
+            ImageConverter.normolize(image);
             SetImage(image, image.Width, image.Height);
         }
     }
