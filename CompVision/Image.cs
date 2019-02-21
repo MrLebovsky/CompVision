@@ -35,12 +35,12 @@ namespace CompVision
 
         public Image() { }
 
-        public Image(int x, int y)
+        public Image(int x, int y, EdgeEffect xEdgeEffect)
         {
             width = x;
             height = y;
             pixels = new double[width * height];
-            edgeEffect = EdgeEffect.Black;
+            edgeEffect = xEdgeEffect;
         }
 
         public Image(Image copy)
@@ -96,11 +96,7 @@ namespace CompVision
 
         public void setPixel(int x, int y, double pixel)
         {
-            // Validation
-            //if (pixel < 0) pixel = 0;
-            //if (pixel > 255) pixel = 255;
-
-            pixels[x + y * width] = (int)pixel;
+            pixels[x + y * width] = pixel;
         }
 
         public double getPixelRepeat(int x, int y)
@@ -152,5 +148,25 @@ namespace CompVision
             }
             return image;
         }
+
+        public static bool sizeEq(Image img1, Image img2)
+        {
+            return img1.width == img2.width && img1.height == img2.height;
+        }
+
+        public static Image operator - (Image left, Image right) {
+
+            Image result = new Image(left.Width, left.Height, left.edgeEffect);
+
+            for (int i = 0; i < left.Width; i++)
+            {
+                for (int j = 0; j < left.Height; j++)
+                {
+                    result.setPixel(i, j, left.getPixel(i, j) - right.getPixel(i, j));
+                }
+            }
+            return result;
+        }
+
     }
 }

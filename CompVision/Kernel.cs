@@ -23,5 +23,13 @@ namespace CompVision
             height = heightX;
             kernel = kernelX;
         }
+
+        public void rotate()
+        {
+            int i = width;
+            width = height;
+            height = i;
+        }
+
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace CompVision
 {
@@ -16,25 +17,27 @@ namespace CompVision
         private Bitmap inputImage;
         private Image.EdgeEffect edgeEffect;
         private String filePath;
+        private int curPyramidIdex = 0;
+        private Pyramid pyramid;
 
         public Form1()
         {
             InitializeComponent();
-            filePath = @"C:\Users\Роман\source\repos\CompVision\CompVision\Res\Shrikrishna.bmp";
+            filePath = @"C:\Users\Роман\source\repos\CompVision\CompVision\Res\lenna.jpg";
             inputImage = new Bitmap(filePath);
             image = new Image(inputImage, edgeEffect);
             edgeEffect = Image.EdgeEffect.Black;
-            SetImage(image, image.Width, image.Height);           
+            SetImage(image);           
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
         }
 
-        public void SetImage(Image xImage, int xSize, int ySize)
+        public void SetImage(Image xImage)
         {
             // Stretches the image to fit the pictureBox.
-            this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            //this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             image = new Image(xImage);
             pictureBox1.Image = image.getOutputImage();
         }
@@ -48,20 +51,20 @@ namespace CompVision
         private void button1_Click(object sender, EventArgs e)
         {
             image = new Image(inputImage, edgeEffect);
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             ImageConverter.sobel(image);
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, KernelCreator.getGauss(Convert.ToDouble(textBox1.Text)));
+            ImageConverter.convolution(image, KernelCreator.getGaussTrue(Convert.ToDouble(textBox1.Text)));
             ImageConverter.normolize(image);
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
@@ -87,30 +90,29 @@ namespace CompVision
         private void button5_Click(object sender, EventArgs e)
         {
             ImageConverter.convolution(image, KernelCreator.getBlur());
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             ImageConverter.convolution(image, KernelCreator.getClarity());
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
             ImageConverter.priut(image);
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
             SetOldImage();
-            this.Size = new System.Drawing.Size(1432, 520);
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-            this.Size = new System.Drawing.Size(846, 520);
+            //this.Size = new System.Drawing.Size(846, 520);
         }
 
         private void выходToolStripMenuItem_Click(object sender, EventArgs e)
@@ -126,7 +128,7 @@ namespace CompVision
 
             inputImage = new Bitmap(filePath);
             image = new Image(inputImage, edgeEffect);
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void getSobelXToolStripMenuItem_Click(object sender, EventArgs e)
@@ -143,14 +145,67 @@ namespace CompVision
         {
             ImageConverter.convolution(image, KernelCreator.getSobelX());
             ImageConverter.normolize(image);
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
         }
 
         private void button10_Click(object sender, EventArgs e)
         {
             ImageConverter.convolution(image, KernelCreator.getSobelY());
             ImageConverter.normolize(image);
-            SetImage(image, image.Width, image.Height);
+            SetImage(image);
+        }
+
+        public void ShowPyramidInfo(Item item)
+        {
+            richTextBox1.Text = "Octave:     " + item.octave + "\n" +
+               "Scale:     " + item.scale + "\n" +
+               "SigmaScale:     " + item.sigmaScale + "\n" +
+               "SigmaEffect:     " + item.sigmaEffect;
+        } 
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            pyramid = new Pyramid(image, Convert.ToInt32(textBox2.Text), Convert.ToDouble(textBox3.Text),
+                            Convert.ToDouble(textBox4.Text));
+            curPyramidIdex = 0;
+
+            SetImage(pyramid.items.ElementAt(curPyramidIdex).image);
+            ShowPyramidInfo(pyramid.items.ElementAt(curPyramidIdex));
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            if (curPyramidIdex > 0)
+            {
+                curPyramidIdex--;
+            }
+            SetImage(pyramid.items.ElementAt(curPyramidIdex).image);
+            ShowPyramidInfo(pyramid.items.ElementAt(curPyramidIdex));
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            if (curPyramidIdex < pyramid.items.Count - 1)
+            {
+                curPyramidIdex++;
+            }
+            SetImage(pyramid.items.ElementAt(curPyramidIdex).image);
+            ShowPyramidInfo(pyramid.items.ElementAt(curPyramidIdex));
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            //image = ImageConverter.halfReduce(image);
+            //SetImage(image);
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            var blur = new GaussianBlur(image.getOutputImage());
+            var result = blur.Process(Convert.ToInt32(textBox1.Text));
+            image = new Image(result, edgeEffect);
+            ImageConverter.normolize(image);
+            SetImage(image);
         }
     }
 }

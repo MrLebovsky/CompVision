@@ -15,24 +15,31 @@ namespace CompVision
         {
             Image copyImage = new Image(image);
 
-            for (int i = 0; i < image.Width; i++)
-            {
-                for (int j = 0; j < image.Height; j++)
-                {
-                    double resultPixel = 0;
-                    for (int x = 0; x < kernel.width; x++)
-                    {
-                        for (int y = 0; y < kernel.height; y++)
-                        {
-                            int realI = i + (x - (kernel.width / 2));
-                            int realJ = j + (y - (kernel.height / 2));
+            Parallel.For(0, image.Width,
+                   i =>
+                   {
+                       for (int j = 0; j < image.Height; j++)
+                       {
+                           double resultPixel = 0;
+                           for (int x = 0; x < kernel.width; x++)
+                           {
+                               for (int y = 0; y < kernel.height; y++)
+                               {
+                                   int realI = i + (x - (kernel.width / 2));
+                                   int realJ = j + (y - (kernel.height / 2));
 
-                            resultPixel += copyImage.getPixel(realI, realJ) * kernel.getkernelAt(x, y);
-                        }
-                    }
-                    image.setPixel(i, j, resultPixel);
-                }
-            }
+                                   if ((realI < 0) ||
+                                        (realJ >= image.Width) ||
+                                        (realI < 0) ||
+                                        (realJ >= image.Height)) continue;
+
+                                   resultPixel += copyImage.getPixel(realI, realJ) * kernel.getkernelAt(x, y);
+                               }
+                           }
+                           image.setPixel(i, j, resultPixel);
+                       }
+                   }
+            );
         }
 
         public static void sobel(Image image)
@@ -97,5 +104,22 @@ namespace CompVision
                 }
             }
         }
+
+        public static Image halfReduce(Image image)
+        {
+            Image resultImage = new Image(image.Width / 2, image.Height / 2, image._EdgeEffect);
+
+            for (int i = 0; i < resultImage.Width; i++)
+            {
+                for (int j = 0; j < resultImage.Height; j++)
+                {
+                    double resullPixel = (image.getPixel(2 * i, 2 * j) + image.getPixel(2 * i + 1, 2 * j) +
+                                  image.getPixel(2 * i, 2 * j + 1) + image.getPixel(2 * i + 1, 2 * j + 1)) / 4;
+                    resultImage.setPixel(i, j, resullPixel);
+                }
+            }
+            return resultImage;
+        }
+
     }
 }
