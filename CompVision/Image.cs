@@ -33,7 +33,11 @@ namespace CompVision
             set => width = value;
         }
 
-        public Image() { }
+        public Image() {
+            width = 0;
+            height = 0;
+            edgeEffect = EdgeEffect.Repeat;
+        }
 
         public Image(int x, int y, EdgeEffect xEdgeEffect)
         {
@@ -49,6 +53,7 @@ namespace CompVision
             height = copy.height;
             pixels = new double[copy.width * copy.height];
             edgeEffect = copy.edgeEffect;
+            //edgeEffect = EdgeEffect.Repeat;
 
             for (int i = 0; i < width; i++)
             {
@@ -111,6 +116,9 @@ namespace CompVision
 
         public double getPixelMirror(int x, int y)
         {
+            int a = x;
+            int b = y;
+
             if (x < 0) x = -x;
             if (y < 0) y = -y;
             if (x >= width) x = 2 * width - x - 1;
@@ -130,19 +138,17 @@ namespace CompVision
         }
 
         public Bitmap getOutputImage() {
-            Bitmap image = new Bitmap(width, height);
 
+            Bitmap image = new Bitmap(width, height);
+            Image outImage = getDeNormolize(this);
 
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < height; j++)
                 {
-                    double pixel = pixels[i + j * width];
-
-                    if (pixel < 0) pixel = 0;
-                    if (pixel > 255) pixel = 255;
-
-                    image.SetPixel(i, j, Color.FromArgb((int)pixel, (int)pixel, (int)pixel));
+                    double pixel = outImage.getPixel(i, j);
+                    image.SetPixel(i, j, Color.FromArgb(Convert.ToInt32(pixel), 
+                        Convert.ToInt32(pixel), Convert.ToInt32(pixel)));
 
                 }
             }
@@ -166,6 +172,47 @@ namespace CompVision
                 }
             }
             return result;
+        }
+
+        public double getMax()
+        {
+            return pixels.Max<double>(); 
+        }
+
+        public double getMin()
+        {
+            return pixels.Min<double>();
+        }
+
+        public static Image getDeNormolize(Image img)
+        {
+            Image outImage = new Image(img); //copy
+
+            double min = img.getMin();
+            double max = img.getMax();
+
+            //если границы в пределах допустимого
+            if (min >= 0 && max <= 1)
+            {
+                for (int i = 0; i < outImage.pixels.Count(); i++)
+                {
+                    outImage.pixels[i] *= 255;
+                }
+                return outImage;
+            }
+
+            double delta = max - min;
+            if (delta == 0)
+            {
+                delta = max;
+            }
+            for (int i = 0; i < outImage.pixels.Count(); i++)
+            {
+                outImage.pixels[i] -= min;
+                outImage.pixels[i] /= delta;
+                outImage.pixels[i] *= 255;
+            }
+            return outImage;
         }
 
     }

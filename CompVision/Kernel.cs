@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CompVision
 {
-    class Kernel
+    public class Kernel
     {   
         public int width { get; set; }
         public int height { get; set; }

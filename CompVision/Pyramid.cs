@@ -40,7 +40,6 @@ namespace CompVision
         public List<Item> items = new List<Item>();
         List<Item> dogs = new List<Item>();
 
-
         public Pyramid(Image image, int scales, double sigma, double sigmaStart)
         {
             /* Reserve data */
@@ -61,12 +60,22 @@ namespace CompVision
             {
                 double intervalSigma = Math.Pow(2, 1.0 / scales);
 
-                for (int i = 0; i < scales + 3; i++)
+                for (int i = 0; i < scales; i++)
                 {
                     double sigmaScalePrev = sigmaScale;
                     sigmaScale = sigma * Math.Pow(intervalSigma, i + 1);
                     double deltaSigma = getDeltaSigma(sigmaScalePrev, sigmaScale);
                     sigmaEffect = sigmaScale * Math.Pow(2, octave);
+
+                    /*
+                     * Чисто для эксперимента :0
+                    var blur = new GaussianBlur(image.getOutputImage());
+                    var result = blur.Process((int)deltaSigma);
+                    Image img = new Image(result, Image.EdgeEffect.Black);
+
+                    items.Add(new Item(img, (int)octave, i + 1,
+                                       sigmaScale, sigmaEffect));
+                   */
 
                     items.Add(new Item(convultionSeparab(getLastImage(), KernelCreator.getGauss(deltaSigma)), (int)octave, i + 1,
                                        sigmaScale, sigmaEffect));
@@ -97,13 +106,12 @@ namespace CompVision
             }
         }
 
-        private static Image convultionSeparab(Image image, Kernel gaussLine) {
+        public static Image convultionSeparab(Image image, Kernel gaussLine) {
 
-            ImageConverter.convolution(image, gaussLine);
+            image = ImageConverter.convolution(image, gaussLine);
             gaussLine.rotate();
-            ImageConverter.convolution(image, gaussLine);
 
-            return image;
+            return ImageConverter.convolution(image, gaussLine);
         }
 
         public double getDeltaSigma(double sigmaPrev, double sigmaNext) {
@@ -111,8 +119,7 @@ namespace CompVision
         }
 
         public Image getLastImage() {
-            Image res = items.ElementAt(items.Count - 1).image;
-            return res;
+            return new Image(items.ElementAt(items.Count - 1).image);
         }
 }
 }

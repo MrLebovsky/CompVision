@@ -11,12 +11,11 @@ namespace CompVision
     {
         ImageConverter() { }
 
-        public static void convolution(Image image, Kernel kernel)
+        public static Image convolution(Image image, Kernel kernel)
         {
-            Image copyImage = new Image(image);
+            Image resultImage = new Image(image.Width, image.Height, image._EdgeEffect);
 
-            Parallel.For(0, image.Width,
-                   i =>
+            for(int i =0; i < image.Width; i++)
                    {
                        for (int j = 0; j < image.Height; j++)
                        {
@@ -28,27 +27,26 @@ namespace CompVision
                                    int realI = i + (x - (kernel.width / 2));
                                    int realJ = j + (y - (kernel.height / 2));
 
-                                   if ((realI < 0) ||
+                                    //тут
+                                   /*if ((realI < 0) ||
                                         (realJ >= image.Width) ||
                                         (realI < 0) ||
-                                        (realJ >= image.Height)) continue;
+                                        (realJ >= image.Height)) continue;*/
 
-                                   resultPixel += copyImage.getPixel(realI, realJ) * kernel.getkernelAt(x, y);
+                                   resultPixel += image.getPixel(realI, realJ) * kernel.getkernelAt(x, y);
                                }
                            }
-                           image.setPixel(i, j, resultPixel);
+                           resultImage.setPixel(i, j, resultPixel);
                        }
                    }
-            );
+            
+            return resultImage;
         }
 
         public static void sobel(Image image)
         {
-            Image copyImageX = new Image(image);
-            Image copyImageY = new Image(image);
-
-            convolution(copyImageX, KernelCreator.getSobelX());
-            convolution(copyImageY, KernelCreator.getSobelY());
+            Image copyImageX = convolution(image, KernelCreator.getSobelX());
+            Image copyImageY = convolution(image, KernelCreator.getSobelY());
 
             for (int i = 0; i < image.Width; i++)
             {
@@ -63,10 +61,8 @@ namespace CompVision
 
         public static void priut(Image image)
         {
-            Image copyImageX = new Image(image);
-            Image copyImageY = new Image(image);
-            convolution(copyImageX, KernelCreator.getPriutX());
-            convolution(copyImageY, KernelCreator.getPriutY());
+            Image copyImageX = convolution(image, KernelCreator.getPriutX());
+            Image copyImageY = convolution(image, KernelCreator.getPriutY());
 
             for (int i = 0; i < image.Width; i++)
             {
@@ -82,24 +78,14 @@ namespace CompVision
         public static void normolize(Image image)
         {
             //Normolize
-            double max = image.getPixel(0, 0);
-            double min = image.getPixel(0, 0);
-
-            for (int i = 0; i < image.Width; i++)
-            {
-                for (int j = 0; j < image.Height; j++)
-                {
-                    if (image.getPixel(i, j) > max) max = image.getPixel(i, j);
-                    if (image.getPixel(i, j) < min) min = image.getPixel(i, j);
-                }
-            }
+            double max = image.getMax();
+            double min = image.getMin();
 
             for (int i = 0; i < image.Width; i++)
             {
                 for (int j = 0; j < image.Height; j++)
                 {
                     double pixel = (image.getPixel(i, j) - min) * (255 / (max - min));
-
                     image.setPixel(i, j, pixel);
                 }
             }
@@ -107,7 +93,7 @@ namespace CompVision
 
         public static Image halfReduce(Image image)
         {
-            Image resultImage = new Image(image.Width / 2, image.Height / 2, image._EdgeEffect);
+            Image resultImage = new Image(image.Width / 2, image.Height / 2, Image.EdgeEffect.Repeat);
 
             for (int i = 0; i < resultImage.Width; i++)
             {

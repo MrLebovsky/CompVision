@@ -89,7 +89,7 @@ namespace CompVision
             return new Kernel(1, radius, core);
         }
 
-        public static Kernel getGaussTrue(double sigma)
+        public static Kernel getGaussSlowPoke(double sigma)
         {
             double sum = 0.0;
             double doubleSigma = 2 * sigma * sigma;

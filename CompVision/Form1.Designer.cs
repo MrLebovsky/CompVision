@@ -33,6 +33,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button15 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
@@ -72,7 +73,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.button15 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -137,6 +137,16 @@
             this.panel1.Size = new System.Drawing.Size(231, 229);
             this.panel1.TabIndex = 4;
             // 
+            // button15
+            // 
+            this.button15.Location = new System.Drawing.Point(24, 125);
+            this.button15.Name = "button15";
+            this.button15.Size = new System.Drawing.Size(181, 23);
+            this.button15.TabIndex = 7;
+            this.button15.Text = "Быстрый Гаусс";
+            this.button15.UseVisualStyleBackColor = true;
+            this.button15.Click += new System.EventHandler(this.button15_Click);
+            // 
             // button6
             // 
             this.button6.Location = new System.Drawing.Point(24, 157);
@@ -193,10 +203,12 @@
             // radioButton3
             // 
             this.radioButton3.AutoSize = true;
+            this.radioButton3.Checked = true;
             this.radioButton3.Location = new System.Drawing.Point(14, 80);
             this.radioButton3.Name = "radioButton3";
             this.radioButton3.Size = new System.Drawing.Size(181, 17);
             this.radioButton3.TabIndex = 2;
+            this.radioButton3.TabStop = true;
             this.radioButton3.Text = "Отражать изображение у края";
             this.radioButton3.UseVisualStyleBackColor = true;
             this.radioButton3.CheckedChanged += new System.EventHandler(this.radioButton3_CheckedChanged);
@@ -215,12 +227,10 @@
             // radioButton1
             // 
             this.radioButton1.AutoSize = true;
-            this.radioButton1.Checked = true;
             this.radioButton1.Location = new System.Drawing.Point(14, 32);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(210, 17);
             this.radioButton1.TabIndex = 0;
-            this.radioButton1.TabStop = true;
             this.radioButton1.Text = "Считать, что снаружи 0  (все черное)";
             this.radioButton1.UseVisualStyleBackColor = true;
             this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
@@ -453,7 +463,7 @@
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(147, 20);
             this.textBox2.TabIndex = 6;
-            this.textBox2.Text = "2";
+            this.textBox2.Text = "5";
             // 
             // button13
             // 
@@ -511,16 +521,6 @@
             this.label2.Size = new System.Drawing.Size(45, 13);
             this.label2.TabIndex = 0;
             this.label2.Text = "Scales: ";
-            // 
-            // button15
-            // 
-            this.button15.Location = new System.Drawing.Point(24, 125);
-            this.button15.Name = "button15";
-            this.button15.Size = new System.Drawing.Size(181, 23);
-            this.button15.TabIndex = 7;
-            this.button15.Text = "Быстрый Гаусс";
-            this.button15.UseVisualStyleBackColor = true;
-            this.button15.Click += new System.EventHandler(this.button15_Click);
             // 
             // Form1
             // 

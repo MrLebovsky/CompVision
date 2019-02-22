@@ -25,8 +25,9 @@ namespace CompVision
             InitializeComponent();
             filePath = @"C:\Users\Роман\source\repos\CompVision\CompVision\Res\lenna.jpg";
             inputImage = new Bitmap(filePath);
+            edgeEffect = Image.EdgeEffect.Repeat;
             image = new Image(inputImage, edgeEffect);
-            edgeEffect = Image.EdgeEffect.Black;
+            this.radioButton2.Checked = true;
             SetImage(image);           
         }
 
@@ -62,7 +63,7 @@ namespace CompVision
 
         private void button2_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, KernelCreator.getGaussTrue(Convert.ToDouble(textBox1.Text)));
+            image = Pyramid.convultionSeparab(image, KernelCreator.getGauss(Convert.ToDouble(textBox1.Text)));
             ImageConverter.normolize(image);
             SetImage(image);
         }
@@ -89,13 +90,14 @@ namespace CompVision
 
         private void button5_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, KernelCreator.getBlur());
+            image = ImageConverter.convolution(image, KernelCreator.getBlur());
+            ImageConverter.normolize(image);
             SetImage(image);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, KernelCreator.getClarity());
+            image = ImageConverter.convolution(image, KernelCreator.getClarity());
             SetImage(image);
         }
 
@@ -143,14 +145,14 @@ namespace CompVision
 
         private void button9_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, KernelCreator.getSobelX());
+            image = ImageConverter.convolution(image, KernelCreator.getSobelX());
             ImageConverter.normolize(image);
             SetImage(image);
         }
 
         private void button10_Click(object sender, EventArgs e)
         {
-            ImageConverter.convolution(image, KernelCreator.getSobelY());
+            image = ImageConverter.convolution(image, KernelCreator.getSobelY());
             ImageConverter.normolize(image);
             SetImage(image);
         }
