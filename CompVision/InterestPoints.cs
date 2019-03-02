@@ -36,15 +36,15 @@ namespace CompVision
     {
         private static int Compare(Point p1, Point p2)
         {
-            return p1.s.CompareTo(p2.s);
+            return p2.s.CompareTo(p1.s);
         }
     
         public List<Point> thresholdFilter(Image image_S, double threshold)
         {
             List<Point> points = new List<Point>();
-            for (var i = 0; i < image_S.Width; i++)
+            for (var i = 0; i < image_S.Width - 1; i++)
             {
-                for (var j = 0; j < image_S.Height; j++)
+                for (var j = 0; j < image_S.Height - 1; j++)
                 {
                     if (image_S.getPixel(i, j) >= threshold)
                     {
@@ -52,7 +52,7 @@ namespace CompVision
                     }
                 }
             }
-            points.Sort(Compare); //тут под вопросом
+            points.Sort(Compare);
             return points;
         }
 
@@ -60,6 +60,10 @@ namespace CompVision
         public List<Point> anmsFilter(List<Point> points, int pointsCount)
         {
             bool [] flagUsedPoints = new bool[points.Count];
+
+            for (int i = 0; i < points.Count; i++)
+                flagUsedPoints[i] = true;
+
             int radius = 3;
             int usedPointsCount = points.Count;
             while (usedPointsCount > pointsCount)
@@ -112,7 +116,7 @@ namespace CompVision
             {
                 for (var y = 0; y < image.Height; y++)
                 {
-                    List<double> local_S = new List<double>();                    // 8 directions
+                    double[] local_S = new double[8];                  // 8 направлений
                     for (var u = -radius; u < radius; u++)
                     {
                         for (var v = -radius; v < radius; v++)
@@ -130,11 +134,11 @@ namespace CompVision
 
                             for (var i = 0; i < 8; i++)
                             {
-                                local_S.Add(directDiff[i] * directDiff[i]);
+                                local_S[i] += directDiff[i] * directDiff[i];
                             }
                         }
                     }
-                    image_S.setPixel(x, y, local_S.Min<double>());
+                    image_S.setPixel(x, y, local_S.Min());
                 }
             }
 

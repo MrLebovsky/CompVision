@@ -238,8 +238,9 @@ namespace CompVision
 
         public static Bitmap createImageWithPoints(Image image, List<Point> points)
         {
+            ImageConverter.normolize(image);
             Bitmap resultImage = image.getOutputImage();
-            for (int i = 0; i < points.Count; i++)
+            for (int i = 0; i < points.Count - 1; i++)
             {
                 resultImage.SetPixel(points[i].x - 1, points[i].y - 1, Color.FromArgb(255, 0, 0));
                 resultImage.SetPixel(points[i].x - 1, points[i].y, Color.FromArgb(255, 0, 0));
@@ -255,5 +256,14 @@ namespace CompVision
             }
             return resultImage;
         }
+
+        public void normolizePixels()
+        {
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] /= 255;
+            }
+        }
+
     }
 }

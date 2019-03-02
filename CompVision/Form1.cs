@@ -218,6 +218,7 @@ namespace CompVision
         private void button16_Click(object sender, EventArgs e)
         {
             interestPoints = new InterestPoints();
+            image.normolizePixels();
             List<Point> points = interestPoints.moravek(image, (double)numericUpDown1.Value,
                             (int)numericUpDown2.Value,
                             (int)numericUpDown3.Value);
