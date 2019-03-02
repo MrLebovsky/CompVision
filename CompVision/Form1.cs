@@ -226,7 +226,12 @@ namespace CompVision
 
         private void button17_Click(object sender, EventArgs e)
         {
-            pyramid.SavePyramidToFile();
+            String path = "";
+            using (var dialog = new FolderBrowserDialog())
+                if (dialog.ShowDialog() == DialogResult.OK)
+                     path = dialog.SelectedPath;
+
+            pyramid.SavePyramidToFile(path);
         }
     }
 }

@@ -255,6 +255,5 @@ namespace CompVision
             }
             return resultImage;
         }
-
     }
 }

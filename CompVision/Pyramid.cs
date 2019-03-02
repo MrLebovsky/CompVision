@@ -157,15 +157,17 @@ namespace CompVision
             return (int)outPut.getPixel(xCur, yCur);
         }
 
-        public void SavePyramidToFile()
+        public void SavePyramidToFile(String path)
         {
             if (items.Count > 0)
             {
                 for (int i = 0; i < items.Count - 1; i++)
                 {
-                    items[i].image.getOutputImage().Save(@"C:\1\SigmaEffect: " + items[i].sigmaEffect.ToString() 
-                        + " Octave: " + items[i].octave.ToString()+ " Scale: " + items[i].scale.ToString() 
-                        + ".jpeg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                    String fullPath = path + "\\Octave " + items[i].octave.ToString() + " Scale " + items[i].scale.ToString()
+                        + " SigmaEffect " + items[i].sigmaEffect.ToString() + " "
+                        + ".jpeg";
+
+                    items[i].image.getOutputImage().Save(fullPath, System.Drawing.Imaging.ImageFormat.Jpeg);
                 }
             }
         }
