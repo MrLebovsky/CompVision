@@ -38,7 +38,7 @@ namespace CompVision
         {
             return p2.s.CompareTo(p1.s);
         }
-    
+
         public List<Point> thresholdFilter(Image image_S, double threshold)
         {
             List<Point> points = new List<Point>();
@@ -59,7 +59,7 @@ namespace CompVision
         // Adaptive Non-Maximum Suppression
         public List<Point> anmsFilter(List<Point> points, int pointsCount)
         {
-            bool [] flagUsedPoints = new bool[points.Count];
+            bool[] flagUsedPoints = new bool[points.Count];
 
             for (int i = 0; i < points.Count; i++)
                 flagUsedPoints[i] = true;
@@ -109,7 +109,6 @@ namespace CompVision
 
         public List<Point> moravek(Image image, double threshold, int radius, int pointsCount)
         {
-
             Image image_S = new Image(image.Width, image.Height, image._EdgeEffect);
 
             for (var x = 0; x < image.Width; x++)
@@ -146,5 +145,142 @@ namespace CompVision
             return anmsFilter(points, pointsCount);
         }
 
+        public List<Point> harris(Image image, double threshold, int radius, int pointsCount)
+        {
+            Image image_dx = ImageConverter.convolution(image, KernelCreator.getSobelX());
+            Image image_dy = ImageConverter.convolution(image, KernelCreator.getSobelY());
+
+            Image image_S = new Image(image.Width, image.Height, image._EdgeEffect);  // Веса
+            for (int x = 0; x < image.Width; x++)
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    image_S.setPixel(x, y, lambda(image_dx, image_dy, x, y, radius));
+                }
+            }
+
+            List<Point> points = thresholdFilter(image_S, threshold);
+            List<Point> localMaximumPoints = localMaximum(points, image_S);
+            return anmsFilter(localMaximumPoints, pointsCount);
+        }
+
+        public double lambda(Image image_dx, Image image_dy, int x, int y, int radius)
+        {
+            double A = 0, B = 0, C = 0;
+            for (var i = x - radius; i < x + radius; i++)
+            {
+                for (var j = y - radius; j < y + radius; j++)
+                {
+                    var curA = image_dx.getPixel(i, j);
+                    var curB = image_dy.getPixel(i, j);
+                    A += curA * curA;
+                    B += curA * curB;
+                    C += curB * curB;
+                }
+            }
+            var descreminant = Math.Sqrt((A - C) * (A - C) + 4 * B * B);
+            return Math.Min(Math.Abs((A + C - descreminant) / 2), Math.Abs((A + C + descreminant) / 2));
+        }
+
+        public List<Point> localMaximum(List<Point> points, Image image_S)
+        {
+            List<Point> result = new List<Point>();
+            const int radius = 2;
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                var p1 = points[i];
+                bool flagMaximum = true;
+
+                for (var j = -radius; j <= radius; ++j)
+                {
+                    for (var k = -radius; k <= radius; ++k)
+                    {
+                        if (j == 0 && k == 0)
+                        {
+                            continue;
+                        }
+
+                        if (image_S.getPixel(p1.x + j, p1.y + k) >= p1.s)
+                        {
+                            flagMaximum = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (flagMaximum == true)
+                {
+                    result.Add(p1);
+                }
+            }
+            return result;
+        }
+
+        public Image Canny(Image image)
+        {
+            image = Pyramid.convultionSeparab(image, KernelCreator.getGauss(1));
+
+            Image Gx = ImageConverter.convolution(image, KernelCreator.getSobelX());
+            Image Gy = ImageConverter.convolution(image, KernelCreator.getSobelY());
+            ImageConverter.sobel(image);
+            Image Gradient = image;
+
+            for (var i = 0; i < image.Width; i++)
+            {
+                for (var j = 0; j < image.Height; j++)
+                {
+                    //Вычислим направление градиента
+                    double t = (Math.Atan(Gx.getPixel(i, j)/ Gy.getPixel(i, j)) * 180 / Math.PI);
+
+                    //Horizontal Edge
+                    if (((-22.5 < t) && (t <= 22.5)) || ((157.5 < t) && (t <= -157.5)))
+                    {
+                        if ((Gradient.getPixel(i, j) < Gradient.getPixel(i, j + 1)) || (Gradient.getPixel(i, j)
+                                                                                        < Gradient.getPixel(i, j - 1)))
+                            Gradient.setPixel(i, j, 0);
+                    }
+                    //Vertical Edge
+                    if (((-112.5 < t) && (t <= -67.5)) || ((67.5 < t) && (t <= 112.5)))
+                    {
+                        if ((Gradient.getPixel(i, j) < Gradient.getPixel(i + 1, j)) || (Gradient.getPixel(i, j) < Gradient.getPixel(i - 1, j)))
+                            Gradient.setPixel(i, j, 0);
+                    }
+                    //+45 Degree Edge
+                    if (((-67.5 < t) && (t <= -22.5)) || ((112.5 < t) && (t <= 157.5)))
+                    {
+                        if ((Gradient.getPixel(i, j) < Gradient.getPixel(i + 1, j - 1)) || (Gradient.getPixel(i, j) < Gradient.getPixel(i - 1, j + 1)))
+                            Gradient.setPixel(i, j, 0);
+                    }
+                    //-45 Degree Edge
+                    if (((-157.5 < t) && (t <= -112.5)) || ((67.5 < t) && (t <= 22.5)))
+                    {
+                        if ((Gradient.getPixel(i, j) < Gradient.getPixel(i + 1, j + 1)) || (Gradient.getPixel(i, j) < Gradient.getPixel(i - 1, j - 1)))
+                            Gradient.setPixel(i, j, 0);
+                    }   
+                }
+            }
+
+            double DownThreshold = 110;
+            double UpThreshold = 120;
+
+            //Двойная пороговая фильтрация
+            for (var i = 0; i < image.Width; i++)
+            {
+                for (var j = 0; j < image.Height; j++)
+                {
+                    if (Gradient.getPixel(i, j) <= DownThreshold)
+                    {
+                        Gradient.setPixel(i, j, 0);
+                    }
+                    else if (Gradient.getPixel(i, j) >= UpThreshold)
+                    {
+                        Gradient.setPixel(i, j, 255);
+                    }
+                    else Gradient.setPixel(i, j, 127);
+                }
+            }
+            return image;
+        }
     }
 }

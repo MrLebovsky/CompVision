@@ -82,6 +82,8 @@
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.button18 = new System.Windows.Forms.Button();
+            this.button19 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -274,6 +276,7 @@
             this.button8.TabIndex = 9;
             this.button8.Text = "<---";
             this.button8.UseVisualStyleBackColor = true;
+            this.button8.Visible = false;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
             // menuStrip1
@@ -548,6 +551,8 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.button19);
+            this.tabPage3.Controls.Add(this.button18);
             this.tabPage3.Controls.Add(this.button16);
             this.tabPage3.Controls.Add(this.label8);
             this.tabPage3.Controls.Add(this.label7);
@@ -567,7 +572,7 @@
             // 
             this.button16.Location = new System.Drawing.Point(9, 126);
             this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(75, 23);
+            this.button16.Size = new System.Drawing.Size(214, 23);
             this.button16.TabIndex = 6;
             this.button16.Text = "Moravek";
             this.button16.UseVisualStyleBackColor = true;
@@ -646,6 +651,26 @@
             0,
             0,
             131072});
+            // 
+            // button18
+            // 
+            this.button18.Location = new System.Drawing.Point(9, 156);
+            this.button18.Name = "button18";
+            this.button18.Size = new System.Drawing.Size(214, 23);
+            this.button18.TabIndex = 7;
+            this.button18.Text = "Harris";
+            this.button18.UseVisualStyleBackColor = true;
+            this.button18.Click += new System.EventHandler(this.button18_Click);
+            // 
+            // button19
+            // 
+            this.button19.Location = new System.Drawing.Point(9, 185);
+            this.button19.Name = "button19";
+            this.button19.Size = new System.Drawing.Size(214, 23);
+            this.button19.TabIndex = 8;
+            this.button19.Text = "Canny";
+            this.button19.UseVisualStyleBackColor = true;
+            this.button19.Click += new System.EventHandler(this.button19_Click);
             // 
             // Form1
             // 
@@ -745,6 +770,8 @@
         private System.Windows.Forms.NumericUpDown numericUpDown3;
         private System.Windows.Forms.NumericUpDown numericUpDown2;
         private System.Windows.Forms.Button button17;
+        private System.Windows.Forms.Button button18;
+        private System.Windows.Forms.Button button19;
     }
 }
 

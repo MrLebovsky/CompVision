@@ -229,10 +229,30 @@ namespace CompVision
         {
             String path = "";
             using (var dialog = new FolderBrowserDialog())
-                if (dialog.ShowDialog() == DialogResult.OK)
-                     path = dialog.SelectedPath;
+                if (dialog.ShowDialog() == DialogResult.OK) {
+                    path = dialog.SelectedPath;
+                    pyramid.SavePyramidToFile(path);
+                }
+                    
 
-            pyramid.SavePyramidToFile(path);
+            
+        }
+
+        private void button18_Click(object sender, EventArgs e)
+        {
+            interestPoints = new InterestPoints();
+            image.normolizePixels();
+            List<Point> points = interestPoints.harris(image, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+            pictureBox1.Image = Image.createImageWithPoints(image, points);
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            interestPoints = new InterestPoints();
+            image = interestPoints.Canny(image);
+            SetImage(image);
         }
     }
 }
