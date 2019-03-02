@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GaussianBlur.cs" />
+    <Compile Include="InterestPoints.cs" />
     <Compile Include="Kernel.cs" />
     <Compile Include="KernelCreator.cs" />
     <Compile Include="Form1.cs">

@@ -33,7 +33,8 @@ namespace CompVision
             set => width = value;
         }
 
-        public Image() {
+        public Image()
+        {
             width = 0;
             height = 0;
             edgeEffect = EdgeEffect.Repeat;
@@ -64,15 +65,18 @@ namespace CompVision
             }
         }
 
-        public Image(Bitmap image, EdgeEffect xEdgeEffect) {
+        public Image(Bitmap image, EdgeEffect xEdgeEffect)
+        {
             width = image.Width;
             height = image.Height;
             edgeEffect = xEdgeEffect;
 
             pixels = new double[width * height];
 
-            for (int i = 0; i<width; i++) {
-                for (int j = 0; j<height; j++) {
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
 
                     Color pixel = image.GetPixel(i, j);
                     pixels[i + j * width] = 0.213 * pixel.R + 0.715 * pixel.G + 0.072 * pixel.B;
@@ -137,8 +141,8 @@ namespace CompVision
             return pixels[x + y * width];
         }
 
-        public Bitmap getOutputImage() {
-
+        public Bitmap getOutputImage()
+        {
             Bitmap image = new Bitmap(width, height);
             Image outImage = getDeNormolize(this);
 
@@ -147,7 +151,7 @@ namespace CompVision
                 for (int j = 0; j < height; j++)
                 {
                     double pixel = outImage.getPixel(i, j);
-                    image.SetPixel(i, j, Color.FromArgb(Convert.ToInt32(pixel), 
+                    image.SetPixel(i, j, Color.FromArgb(Convert.ToInt32(pixel),
                         Convert.ToInt32(pixel), Convert.ToInt32(pixel)));
 
                 }
@@ -160,7 +164,8 @@ namespace CompVision
             return img1.width == img2.width && img1.height == img2.height;
         }
 
-        public static Image operator - (Image left, Image right) {
+        public static Image operator -(Image left, Image right)
+        {
 
             Image result = new Image(left.Width, left.Height, left.edgeEffect);
 
@@ -176,7 +181,7 @@ namespace CompVision
 
         public double getMax()
         {
-            return pixels.Max<double>(); 
+            return pixels.Max<double>();
         }
 
         public double getMin()
@@ -213,6 +218,42 @@ namespace CompVision
                 outImage.pixels[i] *= 255;
             }
             return outImage;
+        }
+
+        public static Bitmap createFromIndex(Image image, int index, Pyramid pyramid)
+        {
+            Bitmap resultImage = new Bitmap(image.Width, image.Height);
+
+            for (int i = 0; i < image.Width; i++)
+            {
+                for (int j = 0; j < image.Height; j++)
+                {
+                    double pixel = pyramid.CoordinateTransform(i, j, index);
+                    image.setPixel(i, j, pixel);
+                }
+            }
+            resultImage = image.getOutputImage();
+            return resultImage;
+        }
+
+        public static Bitmap createImageWithPoints(Image image, List<Point> points)
+        {
+            Bitmap resultImage = image.getOutputImage();
+            for (int i = 0; i < points.Count; i++)
+            {
+                resultImage.SetPixel(points[i].x - 1, points[i].y - 1, Color.FromArgb(255, 0, 0));
+                resultImage.SetPixel(points[i].x - 1, points[i].y, Color.FromArgb(255, 0, 0));
+                resultImage.SetPixel(points[i].x - 1, points[i].y + 1, Color.FromArgb(255, 0, 0));
+
+                resultImage.SetPixel(points[i].x, points[i].y - 1, Color.FromArgb(255, 0, 0));
+                resultImage.SetPixel(points[i].x, points[i].y, Color.FromArgb(255, 0, 0));
+                resultImage.SetPixel(points[i].x, points[i].y + 1, Color.FromArgb(255, 0, 0));
+
+                resultImage.SetPixel(points[i].x + 1, points[i].y - 1, Color.FromArgb(255, 0, 0));
+                resultImage.SetPixel(points[i].x + 1, points[i].y, Color.FromArgb(255, 0, 0));
+                resultImage.SetPixel(points[i].x + 1, points[i].y + 1, Color.FromArgb(255, 0, 0));
+            }
+            return resultImage;
         }
 
     }

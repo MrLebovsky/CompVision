@@ -19,6 +19,7 @@ namespace CompVision
         private String filePath;
         private int curPyramidIdex = 0;
         private Pyramid pyramid;
+        InterestPoints interestPoints;
 
         public Form1()
         {
@@ -28,7 +29,7 @@ namespace CompVision
             edgeEffect = Image.EdgeEffect.Repeat;
             image = new Image(inputImage, edgeEffect);
             this.radioButton2.Checked = true;
-            SetImage(image);           
+            SetImage(image);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -48,7 +49,7 @@ namespace CompVision
             pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox2.Image = image.getOutputImage();
         }
-        
+
         private void button1_Click(object sender, EventArgs e)
         {
             image = new Image(inputImage, edgeEffect);
@@ -135,12 +136,12 @@ namespace CompVision
 
         private void getSobelXToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           
+
         }
 
         private void getSobelYToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           
+
         }
 
         private void button9_Click(object sender, EventArgs e)
@@ -159,16 +160,18 @@ namespace CompVision
 
         public void ShowPyramidInfo(Item item)
         {
-            richTextBox1.Text = "Octave:     " + item.octave + "\n" +
+            richTextBox1.Text =    
+               "Octave:     " + item.octave + "  from  " + pyramid.octaveSize + "\n" +
                "Scale:     " + item.scale + "\n" +
                "SigmaScale:     " + item.sigmaScale + "\n" +
                "SigmaEffect:     " + item.sigmaEffect;
-        } 
+        }
 
         private void button11_Click(object sender, EventArgs e)
         {
             pyramid = new Pyramid(image, Convert.ToInt32(textBox2.Text), Convert.ToDouble(textBox3.Text),
                             Convert.ToDouble(textBox4.Text));
+
             curPyramidIdex = 0;
 
             SetImage(pyramid.items.ElementAt(curPyramidIdex).image);
@@ -197,8 +200,10 @@ namespace CompVision
 
         private void button14_Click(object sender, EventArgs e)
         {
-            //image = ImageConverter.halfReduce(image);
-            //SetImage(image);
+            int i = pyramid.L(Convert.ToDouble(textBox5.Text));
+            Bitmap result = Image.createFromIndex(image, i, pyramid);
+            pictureBox1.Image = result;
+            ShowPyramidInfo(pyramid.items.ElementAt(i));
         }
 
         private void button15_Click(object sender, EventArgs e)
@@ -208,6 +213,20 @@ namespace CompVision
             image = new Image(result, edgeEffect);
             ImageConverter.normolize(image);
             SetImage(image);
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+        {
+            interestPoints = new InterestPoints();
+            List<Point> points = interestPoints.moravek(image, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+            pictureBox1.Image = Image.createImageWithPoints(image, points);
+        }
+
+        private void button17_Click(object sender, EventArgs e)
+        {
+            pyramid.SavePyramidToFile();
         }
     }
 }

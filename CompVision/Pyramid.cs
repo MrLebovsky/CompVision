@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace CompVision
 {
@@ -39,12 +40,17 @@ namespace CompVision
     {
         public List<Item> items = new List<Item>();
         List<Item> dogs = new List<Item>();
+        public int octaveSize;
+        public int ScalesCount;
+
+        public Pyramid() { }
 
         public Pyramid(Image image, int scales, double sigma, double sigmaStart)
         {
             /* Reserve data */
             int octaveCount = (int)Math.Min(Math.Log(image.Width, 2), Math.Log(image.Height, 2)) - 1;
-
+            octaveSize = octaveCount;
+            ScalesCount = scales;
             //items.reserve(octaveCount * scales);
 
             /* First image */
@@ -67,22 +73,14 @@ namespace CompVision
                     double deltaSigma = getDeltaSigma(sigmaScalePrev, sigmaScale);
                     sigmaEffect = sigmaScale * Math.Pow(2, octave);
 
-                    /*
-                     * Чисто для эксперимента :0
-                    var blur = new GaussianBlur(image.getOutputImage());
-                    var result = blur.Process((int)deltaSigma);
-                    Image img = new Image(result, Image.EdgeEffect.Black);
-
-                    items.Add(new Item(img, (int)octave, i + 1,
-                                       sigmaScale, sigmaEffect));
-                   */
-
-                    items.Add(new Item(convultionSeparab(getLastImage(), KernelCreator.getGauss(deltaSigma)), (int)octave, i + 1,
-                                       sigmaScale, sigmaEffect));
-
                     if (i == scales - 1)
                     {
                         tmpLastImage = ImageConverter.halfReduce(getLastImage());
+                        items.Add(new Item(tmpLastImage, (int)octave, 0, sigmaScale, sigmaEffect));
+                    }
+                    else {
+                        items.Add(new Item(convultionSeparab(getLastImage(), KernelCreator.getGauss(deltaSigma)), (int)octave, i + 1,
+                                      sigmaScale, sigmaEffect));
                     }
                 }
                 octave++;
@@ -90,7 +88,7 @@ namespace CompVision
                 sigmaScale = sigma;
                 octaveCount--;
 
-                items.Add(new Item(tmpLastImage, (int)octave, 0, sigmaScale, sigmaEffect));
+                //items.Add(new Item(tmpLastImage, (int)octave, 0, sigmaScale, sigmaEffect));
             }
 
             /* Constructs DOGs */
@@ -106,7 +104,8 @@ namespace CompVision
             }
         }
 
-        public static Image convultionSeparab(Image image, Kernel gaussLine) {
+        public static Image convultionSeparab(Image image, Kernel gaussLine)
+        {
 
             image = ImageConverter.convolution(image, gaussLine);
             gaussLine.rotate();
@@ -114,12 +113,62 @@ namespace CompVision
             return ImageConverter.convolution(image, gaussLine);
         }
 
-        public double getDeltaSigma(double sigmaPrev, double sigmaNext) {
-            return Math.Sqrt(sigmaNext * sigmaNext - sigmaPrev* sigmaPrev);
+        public double getDeltaSigma(double sigmaPrev, double sigmaNext)
+        {
+            return Math.Sqrt(sigmaNext * sigmaNext - sigmaPrev * sigmaPrev);
         }
 
-        public Image getLastImage() {
+        public Image getLastImage()
+        {
             return new Image(items.ElementAt(items.Count - 1).image);
         }
-}
+
+        //https://math.stackexchange.com/a/447670
+        public int nearestGeometricProgressionElement(double a, double q, double value)
+        {
+            double y = (Math.Log(value) - Math.Log(a)) / Math.Log(q);
+            return (int)Math.Round(y);
+        }
+
+        public int L(double sigma)
+        {
+            if (items.Count > 0)
+            {
+                int i = Math.Max(0, nearestGeometricProgressionElement(items[0].sigmaEffect, Math.Pow(2, (double)1 / ScalesCount), sigma));
+                if (i > items.Count - 1) i = items.Count - 1;
+                int octave = i / ScalesCount; //какую октаву взяли
+                int subIndex = i % ScalesCount; //номер масштаба в октаве
+
+                return i;
+            }
+            return 0;
+            
+        }
+
+        public double CoordinateTransform(int x, int y, int index)
+        {
+            int width = items[0].image.Width;
+            int height = items[0].image.Height;
+            Image outPut = items[index].image;
+
+
+            int xCur = (int)(x * outPut.Width * (1.0 / width));
+            int yCur = (int)(y * outPut.Height * (1.0 / height));
+            return (int)outPut.getPixel(xCur, yCur);
+        }
+
+        public void SavePyramidToFile()
+        {
+            if (items.Count > 0)
+            {
+                for (int i = 0; i < items.Count - 1; i++)
+                {
+                    items[i].image.getOutputImage().Save(@"C:\1\SigmaEffect: " + items[i].sigmaEffect.ToString() 
+                        + " Octave: " + items[i].octave.ToString()+ " Scale: " + items[i].scale.ToString() 
+                        + ".jpeg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+        }
+    }
+    
 }
