@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Descriptor.cs" />
     <Compile Include="GaussianBlur.cs" />
     <Compile Include="InterestPoints.cs" />
     <Compile Include="Kernel.cs" />

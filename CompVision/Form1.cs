@@ -14,6 +14,10 @@ namespace CompVision
     public partial class Form1 : Form
     {
         private Image image;
+
+        public Image First;
+        public Image Second;
+
         private Bitmap inputImage;
         private Image.EdgeEffect edgeEffect;
         private String filePath;
@@ -39,7 +43,7 @@ namespace CompVision
         public void SetImage(Image xImage)
         {
             // Stretches the image to fit the pictureBox.
-            //this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             image = new Image(xImage);
             pictureBox1.Image = image.getOutputImage();
         }
@@ -147,20 +151,20 @@ namespace CompVision
         private void button9_Click(object sender, EventArgs e)
         {
             image = ImageConverter.convolution(image, KernelCreator.getSobelX());
-            ImageConverter.normolize(image);
+            //ImageConverter.normolize(image);
             SetImage(image);
         }
 
         private void button10_Click(object sender, EventArgs e)
         {
             image = ImageConverter.convolution(image, KernelCreator.getSobelY());
-            ImageConverter.normolize(image);
+            //ImageConverter.normolize(image);
             SetImage(image);
         }
 
         public void ShowPyramidInfo(Item item)
         {
-            richTextBox1.Text =    
+            richTextBox1.Text =
                "Octave:     " + item.octave + "  from  " + pyramid.octaveSize + "\n" +
                "Scale:     " + item.scale + "\n" +
                "SigmaScale:     " + item.sigmaScale + "\n" +
@@ -229,13 +233,14 @@ namespace CompVision
         {
             String path = "";
             using (var dialog = new FolderBrowserDialog())
-                if (dialog.ShowDialog() == DialogResult.OK) {
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
                     path = dialog.SelectedPath;
                     pyramid.SavePyramidToFile(path);
                 }
-                    
 
-            
+
+
         }
 
         private void button18_Click(object sender, EventArgs e)
@@ -253,6 +258,96 @@ namespace CompVision
             interestPoints = new InterestPoints();
             image = interestPoints.Canny(image);
             SetImage(image);
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            image = ImageConverter.convolution(image, KernelCreator.getShift());
+            SetImage(image);
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            image = ImageConverter.noise(image, 2000);
+            SetImage(image);
+        }
+
+        private void button22_Click(object sender, EventArgs e)
+        {
+            image = ImageConverter.rotate(image);
+            SetImage(image);
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            image = ImageConverter.Brightness(image, trackBar1.Value, trackBar1.Maximum);
+            SetImage(image);
+        }
+
+        private void trackBar2_Scroll(object sender, EventArgs e)
+        {
+            image = ImageConverter.Сontrast(image, trackBar2.Value, trackBar2.Maximum);
+            SetImage(image);
+        }
+
+        private void button23_Click(object sender, EventArgs e)
+        {
+            InterestPoints interestPoints = new InterestPoints();
+            image.normolizePixels();
+            image = interestPoints.HarrisMap(image, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+            SetImage(image);
+        }
+
+        private void button24_Click(object sender, EventArgs e)
+        {
+            interestPoints = new InterestPoints();
+            Image FirstImage = new Image(First);
+            FirstImage.normolizePixels();
+            List<Point> FirstPoints = interestPoints.harris(FirstImage, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors1 = DescriptorCreator.getDescriptors(First, FirstPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+            
+            Image SecondImage = new Image(Second);
+            SecondImage.normolizePixels();
+            List<Point> SecondPoints = interestPoints.harris(SecondImage, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors2 = DescriptorCreator.getDescriptors(Second, SecondPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+            Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints), 
+                Image.createImageWithPoints(SecondImage, SecondPoints));
+
+            List<Vector> similar = DescriptorCreator.findSimilar(descriptors1, descriptors2, (double)numericUpDown7.Value);
+            Image.drawLines(res, First.Width, similar);
+
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.Image = res;
+        }
+
+        private void button25_Click(object sender, EventArgs e)
+        {
+            openFileDialog1 = new OpenFileDialog() { Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*" };
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                filePath = openFileDialog1.FileName;
+
+            First = new Image(new Bitmap(filePath), edgeEffect);
+        }
+
+        private void button26_Click(object sender, EventArgs e)
+        {
+            openFileDialog1 = new OpenFileDialog() { Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*" };
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                filePath = openFileDialog1.FileName;
+
+            Second = new Image(new Bitmap(filePath), edgeEffect);
         }
     }
 }

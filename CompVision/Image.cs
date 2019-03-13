@@ -265,5 +265,48 @@ namespace CompVision
             }
         }
 
+        public static Bitmap glueImages(Bitmap imageLeft, Bitmap imageRight)
+        {
+            // max height
+            var height = Math.Max(imageLeft.Height, imageRight.Height);
+
+            Bitmap resultImage = new Bitmap(imageLeft.Width + imageRight.Width, height);
+
+            // imageLeft
+            for (var i = 0; i < imageLeft.Width; i++)
+            {
+                for (var j = 0; j < imageLeft.Height; j++)
+                {
+                    Color pixel = imageLeft.GetPixel(i, j);
+                    resultImage.SetPixel(i, j, pixel);
+                }
+            }
+
+            // imageRight
+            for (var i = 0; i < imageRight.Width; i++)
+            {
+                for (var j = 0; j < imageRight.Height; j++)
+                {
+                    Color pixel = imageRight.GetPixel(i, j);
+                    resultImage.SetPixel(i + imageLeft.Width, j, pixel);
+                }
+            }
+            return resultImage;
+        }
+
+        public static void drawLines(Bitmap image, int firstWidth, List<Vector> similar)
+        {
+            Random rnd = new Random();
+            Graphics line = Graphics.FromImage(image);
+            Pen p;
+
+            foreach (Vector vec in similar)
+            {
+                p = new Pen(Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256)), 1);
+                Point p1 = vec.first.getInterPoint();
+                Point p2 = vec.second.getInterPoint();
+                line.DrawLine(p, p1.x, p1.y, p2.x + firstWidth, p2.y);
+            }
+        }
     }
 }

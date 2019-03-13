@@ -145,41 +145,76 @@ namespace CompVision
             return anmsFilter(points, pointsCount);
         }
 
-        public List<Point> harris(Image image, double threshold, int radius, int pointsCount)
+        public Image HarrisMap(Image image, double threshold, int radius, int pointsCount)
         {
+            Kernel gauss = KernelCreator.getGaussSlowPoke((double)radius / 3);
+            image = ImageConverter.convolution(image, gauss);
+
             Image image_dx = ImageConverter.convolution(image, KernelCreator.getSobelX());
+
             Image image_dy = ImageConverter.convolution(image, KernelCreator.getSobelY());
+
 
             Image image_S = new Image(image.Width, image.Height, image._EdgeEffect);  // Веса
             for (int x = 0; x < image.Width; x++)
             {
                 for (int y = 0; y < image.Height; y++)
                 {
-                    image_S.setPixel(x, y, lambda(image_dx, image_dy, x, y, radius));
+                    image_S.setPixel(x, y, lambda(image_dx, image_dy, x, y, radius, gauss));
                 }
             }
 
-            List<Point> points = thresholdFilter(image_S, threshold);
-            List<Point> localMaximumPoints = localMaximum(points, image_S);
-            return anmsFilter(localMaximumPoints, pointsCount);
+            return image_S;
         }
 
-        public double lambda(Image image_dx, Image image_dy, int x, int y, int radius)
+        public List<Point> harris(Image image, double threshold, int radius, int pointsCount)
+        {
+            Kernel gauss = KernelCreator.getGaussSlowPoke((double)radius / 3);
+            //image = ImageConverter.convolution(image, gauss);
+
+            Image image_dx = ImageConverter.convolution(image, KernelCreator.getSobelX());
+            //ImageConverter.normolize(image_dx);
+
+            Image image_dy = ImageConverter.convolution(image, KernelCreator.getSobelY());
+            //ImageConverter.normolize(image_dy);
+
+
+            Image image_S = new Image(image.Width, image.Height, image._EdgeEffect);  // Веса
+            for (int x = 0; x < image.Width; x++)
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    image_S.setPixel(x, y, lambda(image_dx, image_dy, x, y, radius, gauss));
+                }
+            }
+
+            List<Point> localMaximumPoints = localMaximum(thresholdFilter(image_S, threshold), image_S); 
+            return anmsFilter(localMaximumPoints, pointsCount); 
+        }
+
+        public double lambda(Image image_dx, Image image_dy, int x, int y, int radius, Kernel gauss)
         {
             double A = 0, B = 0, C = 0;
+            int k = 0, q = 0;
+
             for (var i = x - radius; i < x + radius; i++)
             {
                 for (var j = y - radius; j < y + radius; j++)
                 {
+                    //Вычисляем матрицу H
                     var curA = image_dx.getPixel(i, j);
-                    var curB = image_dy.getPixel(i, j);
-                    A += curA * curA;
-                    B += curA * curB;
-                    C += curB * curB;
+                    var curB = image_dy.getPixel(i, j) ;
+                    A += curA * curA * gauss.getkernelAt(q, k);
+                    B += curA * curB * gauss.getkernelAt(q, k);
+                    C += curB * curB * gauss.getkernelAt(q, k);
+                    k++;
                 }
+                k = 0;
+                q++;
             }
-            var descreminant = Math.Sqrt((A - C) * (A - C) + 4 * B * B);
-            return Math.Min(Math.Abs((A + C - descreminant) / 2), Math.Abs((A + C + descreminant) / 2));
+            //var descreminant = Math.Sqrt((C - A) * (C - A) + 4 * B * B);
+
+            return ((A * C - B * B) - 0.05 * (A + C) * (A + C)); //вариант оригинального Харриса
         }
 
         public List<Point> localMaximum(List<Point> points, Image image_S)
@@ -187,6 +222,8 @@ namespace CompVision
             List<Point> result = new List<Point>();
             const int radius = 2;
 
+            //Смотрим интенсивность всех точек в окрестности
+            //c заданным радиусом
             for (int i = 0; i < points.Count; i++)
             {
                 var p1 = points[i];

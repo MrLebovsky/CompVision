@@ -126,5 +126,12 @@ namespace CompVision
             return new Kernel(size, size , kernel);
         }
 
+        public static Kernel getShift()
+        {
+            double[] kernel = new double[9]{0, 1, 0,
+                                             0, 0, 0,
+                                             0, 0, 0};
+            return new Kernel(3, 3, kernel);
+        }
     }
 }
