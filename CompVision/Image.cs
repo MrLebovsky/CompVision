@@ -306,6 +306,15 @@ namespace CompVision
                 Point p1 = vec.first.getInterPoint();
                 Point p2 = vec.second.getInterPoint();
                 line.DrawLine(p, p1.x, p1.y, p2.x + firstWidth, p2.y);
+
+                //нарисуем ориентацию точки
+                int r = 10;
+
+                line.DrawLine(p, p1.x, p1.y, Convert.ToSingle(p1.x + r * Math.Cos(p1.Phi)), 
+                Convert.ToSingle(p1.y + r * Math.Sin(p1.Phi)));
+
+                line.DrawLine(p, p2.x + firstWidth, p2.y, Convert.ToSingle(p2.x + r * Math.Cos(p2.Phi)) + firstWidth,
+                Convert.ToSingle(p2.y + r * Math.Sin(p2.Phi)));
             }
         }
     }

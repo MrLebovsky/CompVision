@@ -14,6 +14,13 @@ namespace CompVision
         public double s; // S(x,y) - значение оператора
         private double sigmaScale;
         private double sigmaEffect;
+        public double phiRotate;
+
+        public double Phi
+        {
+            get => phiRotate;
+            set => phiRotate = value;
+        }
 
         public Point(int x = 0, int y = 0, double s = 0) : this()
         {
@@ -21,7 +28,7 @@ namespace CompVision
             this.y = y;
             this.s = s;
         }
-        public Point(int x, int y, int z, double s, double sigmaScale = 0, double sigmaEffect = 0)
+        public Point(int x, int y, int z, double s, double sigmaScale = 0, double sigmaEffect = 0, double phiRotate = 0)
         {
             this.x = x;
             this.y = y;
@@ -29,6 +36,7 @@ namespace CompVision
             this.s = s;
             this.sigmaScale = sigmaScale;
             this.sigmaEffect = sigmaEffect;
+            this.phiRotate = phiRotate;
         }
     };
 

@@ -312,7 +312,7 @@ namespace CompVision
             Descriptor[] descriptors1 = DescriptorCreator.getDescriptors(First, FirstPoints, (int)numericUpDown6.Value,
                 (int)numericUpDown4.Value, (int)numericUpDown5.Value);
 
-            
+
             Image SecondImage = new Image(Second);
             SecondImage.normolizePixels();
             List<Point> SecondPoints = interestPoints.harris(SecondImage, (double)numericUpDown1.Value,
@@ -322,7 +322,7 @@ namespace CompVision
             Descriptor[] descriptors2 = DescriptorCreator.getDescriptors(Second, SecondPoints, (int)numericUpDown6.Value,
                 (int)numericUpDown4.Value, (int)numericUpDown5.Value);
 
-            Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints), 
+            Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints),
                 Image.createImageWithPoints(SecondImage, SecondPoints));
 
             List<Vector> similar = DescriptorCreator.findSimilar(descriptors1, descriptors2, (double)numericUpDown7.Value);
@@ -334,20 +334,100 @@ namespace CompVision
 
         private void button25_Click(object sender, EventArgs e)
         {
-            openFileDialog1 = new OpenFileDialog() { Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*" };
+            openFileDialog1 = new OpenFileDialog() { Filter = 
+                "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*" };
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 filePath = openFileDialog1.FileName;
 
             First = new Image(new Bitmap(filePath), edgeEffect);
+            SetImage(First);
         }
 
         private void button26_Click(object sender, EventArgs e)
         {
-            openFileDialog1 = new OpenFileDialog() { Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*" };
+            openFileDialog1 = new OpenFileDialog() { Filter = 
+                "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*" };
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 filePath = openFileDialog1.FileName;
 
             Second = new Image(new Bitmap(filePath), edgeEffect);
+            SetImage(Second);
+        }
+
+        private void button27_Click(object sender, EventArgs e)
+        {
+            First = new Image(ImageConverter.rotateImage(First.getOutputImage(), 
+                float.Parse(textBox6.Text)), edgeEffect);
+            SetImage(First);
+        }
+
+        private void button28_Click(object sender, EventArgs e)
+        {
+            Second = new Image(ImageConverter.rotateImage(Second.getOutputImage(), 
+                float.Parse(textBox6.Text)), edgeEffect);
+            SetImage(Second);
+        }
+
+        private void button29_Click(object sender, EventArgs e)
+        {
+            interestPoints = new InterestPoints();
+            Image FirstImage = new Image(First);
+            FirstImage.normolizePixels();
+            List<Point> FirstPoints = interestPoints.harris(FirstImage, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors1 = DescriptorCreator.getDescriptorsInvRotation(First, FirstPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+
+            Image SecondImage = new Image(Second);
+            SecondImage.normolizePixels();
+            List<Point> SecondPoints = interestPoints.harris(SecondImage, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors2 = DescriptorCreator.getDescriptorsInvRotation(Second, SecondPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+            Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints),
+                Image.createImageWithPoints(SecondImage, SecondPoints));
+
+            List<Vector> similar = DescriptorCreator.findSimilar(descriptors1, descriptors2, (double)numericUpDown7.Value);
+            Image.drawLines(res, First.Width, similar);
+
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+            pictureBox1.Image = res;
+        }
+
+        private void сохранитьИзображениеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (pictureBox1.Image != null) //если в pictureBox есть изображение
+            {
+                //создание диалогового окна "Сохранить как..", для сохранения изображения
+                SaveFileDialog savedialog = new SaveFileDialog();
+                savedialog.Title = "Сохранить картинку как...";
+                //отображать ли предупреждение, если пользователь указывает имя уже существующего файла
+                savedialog.OverwritePrompt = true;
+                //отображать ли предупреждение, если пользователь указывает несуществующий путь
+                savedialog.CheckPathExists = true;
+                //список форматов файла, отображаемый в поле "Тип файла"
+                savedialog.Filter = "Image Files(*.BMP)|*.BMP|Image Files(*.JPG)|*.JPG|Image Files(*.GIF)|*.GIF|Image Files(*.PNG)|*.PNG|All files (*.*)|*.*";
+                //отображается ли кнопка "Справка" в диалоговом окне
+                savedialog.ShowHelp = true;
+                if (savedialog.ShowDialog() == DialogResult.OK) //если в диалоговом окне нажата кнопка "ОК"
+                {
+                    try
+                    {
+                        pictureBox1.Image.Save(savedialog.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Невозможно сохранить изображение", "Ошибка",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
     }
 }

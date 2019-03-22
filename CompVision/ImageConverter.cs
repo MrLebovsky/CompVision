@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace CompVision
 {
@@ -180,6 +181,17 @@ namespace CompVision
                 }
             }
             return resultImage;
+        }
+
+        public static Bitmap rotateImage(Bitmap input, float angle)
+        {
+            Bitmap result = new Bitmap(input.Width, input.Height);
+            Graphics g = Graphics.FromImage(result);
+            g.TranslateTransform((float)input.Width / 2, (float)input.Height / 2);
+            g.RotateTransform(angle);
+            g.TranslateTransform(-(float)input.Width / 2, -(float)input.Height / 2);
+            g.DrawImage(input, new System.Drawing.Point(0, 0));
+            return result;
         }
     }
 }

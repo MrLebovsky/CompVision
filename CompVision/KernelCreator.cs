@@ -133,5 +133,13 @@ namespace CompVision
                                              0, 0, 0};
             return new Kernel(3, 3, kernel);
         }
+
+        public static double getGaussValue(int i, int j, double sigma)
+        {
+            int radius = (int)(sigma * 6);
+            if (radius % 2 == 0) radius++;
+            return (1.0 / (2 * sigma * sigma * Math.PI)) * Math.Exp(((i - radius / 2) 
+                * (i - radius / 2) + (j - radius / 2) * (j - radius / 2)) * (-1.0 / (2 * sigma * sigma)));
+        }
     }
 }
