@@ -221,6 +221,8 @@ namespace CompVision
             var peak_1 = getPeak(baskets);
             var peak_2 = getPeak(baskets, (int)peak_1);
 
+            //хотя бы peak_1 должен быть!
+
             if (peak_2 != -1 && baskets[(int)peak_2] / baskets[(int)peak_1] >= 0.8)
             { // Если второй пик не ниже 80%
                 double[] peaks = new double[2];
@@ -248,6 +250,8 @@ namespace CompVision
             var barCharCountInLine = (barCharCount / 4);
 
             Image image_dx = ImageConverter.convolution(image, KernelCreator.getSobelX());
+            //image_dx.getOutputImage().Save("sobel.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+
             Image image_dy = ImageConverter.convolution(image, KernelCreator.getSobelY());
 
             Descriptor[] descriptors = new Descriptor[interestPoints.Count];
@@ -256,7 +260,8 @@ namespace CompVision
                 descriptors[k] = new Descriptor(barCharCount * basketCount, interestPoints[k]);
                 var peaks = getPointOrientation(image_dx, image_dy, interestPoints[k], sigma, radius);    // Ориентация точки
 
-                foreach (var phiRotate in peaks) {
+                foreach (var phiRotate in peaks)
+                {
 
                     Point p = interestPoints[k];
                     p.Phi = phiRotate;
@@ -311,15 +316,124 @@ namespace CompVision
                             descriptors[k].data[indexSide] += sideBasketValue;
                         }
                     }
-                descriptors[k].normalize();
-                descriptors[k].clampData(0, 0.2);
-                descriptors[k].normalize();
-                descriptors[k].Point = interestPoints[k];
+                    descriptors[k].normalize();
+                    descriptors[k].clampData(0, 0.2);
+                    descriptors[k].normalize();
+                    descriptors[k].Point = interestPoints[k];
+                }
             }
+            return descriptors;
         }
-    return descriptors;
-}
-}
+
+        /*  Инвариантость к вращению и масштабу */
+        public static Descriptor[] getDescriptorsInvRotationScale(Pyramid pyramid, List<Point> points, int _radius,
+                                                                               int basketCount, int barCharCount)
+        {
+            var sigma = 20;
+            var sigma0 = pyramid.dogs[0].sigmaScale;
+            var sector = 2 * Math.PI / basketCount;
+            var halfSector = Math.PI / basketCount;
+            var barCharCountInLine = (barCharCount / 4);
+
+            List<Image> images_dx = new List<Image>();
+            List<Image> images_dy = new List<Image>();
+
+            // Ищем производные заранее
+            for (int i = 0; i < pyramid.dogs.Count; i++)
+            {
+                Image imageTrue = pyramid.dogs[i].trueImage;
+                images_dx.Add(ImageConverter.convolution(imageTrue, KernelCreator.getSobelX()));
+                images_dy.Add(ImageConverter.convolution(imageTrue, KernelCreator.getSobelY()));
+            }
+
+            Descriptor[] descriptors = new Descriptor[points.Count];
+
+            for (int k = 0; k < points.Count; k++)
+            {
+                descriptors[k] = new Descriptor(barCharCount * basketCount, points[k]);
+
+                double scale = (points[k].sigmaScale / sigma0);
+                int radius = _radius * (int)scale;
+                int dimension = 2 * radius;
+                int barCharStep = dimension / (barCharCount / 4);
+                Image image_dx = images_dx[points[k].z];
+
+                //image_dx.getOutputImage().Save("sobel.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+
+                Image image_dy = images_dy[points[k].z];
+                Kernel gaussDoubleDim = KernelCreator.getGaussDoubleDim(dimension, dimension, sigma * scale);
+                // Ориентация точки
+                var peaks = getPointOrientation(image_dx, image_dy, points[k], sigma, radius);
+
+                foreach (var phiRotate in peaks)
+                {
+                    for (var i = 1; i < dimension; i++)
+                    {
+                        for (var j = 1; j < dimension; j++)
+                        {
+                            // координаты
+                            var coord_X = i - radius + points[k].x;
+                            var coord_Y = j - radius + points[k].y;
+
+                            // градиент
+                            var gradient_X = image_dx.getPixel(coord_X, coord_Y);
+                            var gradient_Y = image_dy.getPixel(coord_X, coord_Y);
+
+                            // получаем значение(домноженное на Гаусса) и угол
+                            var value = getGradientValue(gradient_X, gradient_Y) * gaussDoubleDim.getkernelAt(i, j);
+                            //                    var value = getGradientValue(gradient_X, gradient_Y)  * KernelCreator.getGaussValue(i, j, sigma * scale, radius);
+                            var phi = getGradientDirection(gradient_X, gradient_Y) + 2 * Math.PI - phiRotate;
+                            phi = (phi % 2 * Math.PI);  // Shift
+
+                            // получаем индекс корзины в которую входит phi и смежную с ней
+                            int firstBasketIndex = (int)Math.Floor(phi / sector);
+                            int secondBasketIndex = Convert.ToInt32(Math.Floor((phi - halfSector) / sector) + basketCount) % basketCount;
+
+                            // вычисляем центр
+                            var mainBasketPhi = firstBasketIndex * sector + halfSector;
+
+                            // распределяем L(value)
+                            var mainBasketValue = (1 - (Math.Abs(phi - mainBasketPhi) / sector)) * value;
+                            var sideBasketValue = value - mainBasketValue;
+
+                            // вычисляем индекс куда записывать значения
+                            int i_Rotate = (int)Math.Round((i - radius) * Math.Cos(phiRotate) + (j - radius) * Math.Sin(phiRotate));
+                            int j_Rotate = (int)Math.Round(-(i - radius) * Math.Sin(phiRotate) + (j - radius) * Math.Cos(phiRotate));
+
+                            // отбрасываем
+                            if (i_Rotate < -radius || j_Rotate < -radius || i_Rotate >= radius || j_Rotate >= radius)
+                            {
+                                continue;
+                            }
+
+                            var tmp_i = (i_Rotate + radius) / barCharStep;
+                            var tmp_j = (j_Rotate + radius) / barCharStep;
+
+                            var indexMain = (tmp_i * barCharCountInLine + tmp_j) * basketCount + firstBasketIndex;
+                            var indexSide = (tmp_i * barCharCountInLine + tmp_j) * basketCount + secondBasketIndex;
+
+                            // записываем значения
+                            descriptors[k].data[indexMain] += mainBasketValue;
+                            descriptors[k].data[indexSide] += sideBasketValue;
+                        }
+                    }
+                    descriptors[k].normalize();
+                    descriptors[k].clampData(0, 0.2);
+                    descriptors[k].normalize();
+                }
+            }
+
+            for (int i = 0; i < descriptors.Length; i++)
+            {
+                //приводим к оригинальному масштабу
+                Point interPoint = descriptors[i].getInterPoint();
+                double step_W = Convert.ToDouble(pyramid.dogs[0].image.Width) / pyramid.dogs[interPoint.z].image.Width;
+                double step_H = Convert.ToDouble(pyramid.dogs[0].image.Height) / pyramid.dogs[interPoint.z].image.Height;
+                descriptors[i].setPointXY((int)Math.Round(interPoint.x * step_W), (int)Math.Round(interPoint.y * step_H));
+            }
+            return descriptors;
+        }
+    }
 
     public class Descriptor
     {
@@ -346,7 +460,8 @@ namespace CompVision
                 data[i] /= length;
         }
 
-        public Point Point{
+        public Point Point
+        {
             get => interPoint;
             set => interPoint = value;
         }
@@ -364,6 +479,12 @@ namespace CompVision
         {
             for (int i = 0; i < data.Length; i++)
                 data[i] = Extension.Clamp(min, max, data[i]);
+        }
+
+        public void setPointXY(int x, int y)
+        {
+            this.interPoint.x = x;
+            this.interPoint.y = y;
         }
     }
 

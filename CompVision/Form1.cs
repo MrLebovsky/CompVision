@@ -238,9 +238,6 @@ namespace CompVision
                     path = dialog.SelectedPath;
                     pyramid.SavePyramidToFile(path);
                 }
-
-
-
         }
 
         private void button18_Click(object sender, EventArgs e)
@@ -428,6 +425,80 @@ namespace CompVision
                     }
                 }
             }
+        }
+
+        private void button30_Click(object sender, EventArgs e)
+        {
+            InterestPoints interestPoints = new InterestPoints();
+            image.normolizePixels();
+            pyramid = new Pyramid(this.image);
+            List<Point> points = interestPoints.blob(pyramid, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+            interestPoints.restorePoints(pyramid, points);
+            pictureBox1.Image = Image.createImageWithPointsBlob(image, points);
+        }
+
+        private void button32_Click(object sender, EventArgs e)
+        {
+            Bitmap resized = 
+                new Bitmap(First.getOutputImage(), 
+                    new Size(First.Width / Convert.ToInt32(textBox7.Text), 
+                        First.Height / Convert.ToInt32(textBox7.Text)));
+
+            First = new Image(resized, edgeEffect);
+
+            pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+            pictureBox1.Image = resized;
+        }
+
+        private void button31_Click(object sender, EventArgs e)
+        {
+            Bitmap resized =
+                new Bitmap(Second.getOutputImage(),
+                    new Size(Second.Width / Convert.ToInt32(textBox7.Text),
+                        Second.Height / Convert.ToInt32(textBox7.Text)));
+
+            Second = new Image(resized, edgeEffect);
+
+            pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+            pictureBox1.Image = resized;
+        }
+
+        private void button33_Click(object sender, EventArgs e)
+        {
+            interestPoints = new InterestPoints();
+            Image FirstImage = new Image(First);
+            FirstImage.normolizePixels();
+            Pyramid pyramid_1 = new Pyramid(FirstImage);
+
+            List<Point> FirstPoints = interestPoints.blob(pyramid_1, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors1 = DescriptorCreator.getDescriptorsInvRotationScale(pyramid_1, FirstPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+            //-------------------------------------------------------------------///
+            Image SecondImage = new Image(Second);
+            SecondImage.normolizePixels();
+
+            Pyramid pyramid_2 = new Pyramid(SecondImage);
+
+            List<Point> SecondPoints = interestPoints.blob(pyramid_2, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors2 = DescriptorCreator.getDescriptorsInvRotationScale(pyramid_2, SecondPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+            Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints),
+                Image.createImageWithPoints(SecondImage, SecondPoints));
+
+            List<Vector> similar = DescriptorCreator.findSimilar(descriptors1, descriptors2, (double)numericUpDown7.Value);         
+
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+            pictureBox1.Image = Image.drawLinesAndCircles(new Image(res, edgeEffect), First.Width, similar); ;
         }
     }
 }

@@ -76,6 +76,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.button30 = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.trackBar2 = new System.Windows.Forms.TrackBar();
@@ -111,6 +112,11 @@
             this.button22 = new System.Windows.Forms.Button();
             this.button23 = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.button31 = new System.Windows.Forms.Button();
+            this.button32 = new System.Windows.Forms.Button();
+            this.label16 = new System.Windows.Forms.Label();
+            this.textBox7 = new System.Windows.Forms.TextBox();
+            this.button33 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -597,6 +603,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.button30);
             this.tabPage3.Controls.Add(this.label10);
             this.tabPage3.Controls.Add(this.label9);
             this.tabPage3.Controls.Add(this.trackBar2);
@@ -618,10 +625,20 @@
             this.tabPage3.Text = "Лаб3";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // button30
+            // 
+            this.button30.Location = new System.Drawing.Point(9, 214);
+            this.button30.Name = "button30";
+            this.button30.Size = new System.Drawing.Size(214, 23);
+            this.button30.TabIndex = 13;
+            this.button30.Text = "Blob";
+            this.button30.UseVisualStyleBackColor = true;
+            this.button30.Click += new System.EventHandler(this.button30_Click);
+            // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(9, 300);
+            this.label10.Location = new System.Drawing.Point(9, 345);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(83, 13);
             this.label10.TabIndex = 12;
@@ -630,7 +647,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(9, 229);
+            this.label9.Location = new System.Drawing.Point(9, 274);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(50, 13);
             this.label9.TabIndex = 11;
@@ -638,7 +655,7 @@
             // 
             // trackBar2
             // 
-            this.trackBar2.Location = new System.Drawing.Point(9, 316);
+            this.trackBar2.Location = new System.Drawing.Point(9, 361);
             this.trackBar2.Minimum = -10;
             this.trackBar2.Name = "trackBar2";
             this.trackBar2.Size = new System.Drawing.Size(214, 45);
@@ -647,7 +664,7 @@
             // 
             // trackBar1
             // 
-            this.trackBar1.Location = new System.Drawing.Point(9, 248);
+            this.trackBar1.Location = new System.Drawing.Point(9, 293);
             this.trackBar1.Minimum = -10;
             this.trackBar1.Name = "trackBar1";
             this.trackBar1.Size = new System.Drawing.Size(214, 45);
@@ -760,6 +777,11 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.button33);
+            this.tabPage4.Controls.Add(this.button31);
+            this.tabPage4.Controls.Add(this.button32);
+            this.tabPage4.Controls.Add(this.label16);
+            this.tabPage4.Controls.Add(this.textBox7);
             this.tabPage4.Controls.Add(this.button29);
             this.tabPage4.Controls.Add(this.button28);
             this.tabPage4.Controls.Add(this.button27);
@@ -786,17 +808,17 @@
             // 
             // button29
             // 
-            this.button29.Location = new System.Drawing.Point(164, 217);
+            this.button29.Location = new System.Drawing.Point(64, 337);
             this.button29.Name = "button29";
-            this.button29.Size = new System.Drawing.Size(75, 23);
+            this.button29.Size = new System.Drawing.Size(120, 31);
             this.button29.TabIndex = 21;
-            this.button29.Text = "Go!";
+            this.button29.Text = "invRotation";
             this.button29.UseVisualStyleBackColor = true;
             this.button29.Click += new System.EventHandler(this.button29_Click);
             // 
             // button28
             // 
-            this.button28.Location = new System.Drawing.Point(85, 217);
+            this.button28.Location = new System.Drawing.Point(85, 194);
             this.button28.Name = "button28";
             this.button28.Size = new System.Drawing.Size(75, 23);
             this.button28.TabIndex = 20;
@@ -806,7 +828,7 @@
             // 
             // button27
             // 
-            this.button27.Location = new System.Drawing.Point(7, 217);
+            this.button27.Location = new System.Drawing.Point(7, 194);
             this.button27.Name = "button27";
             this.button27.Size = new System.Drawing.Size(75, 23);
             this.button27.TabIndex = 19;
@@ -817,7 +839,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(12, 184);
+            this.label15.Location = new System.Drawing.Point(9, 171);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(37, 13);
             this.label15.TabIndex = 18;
@@ -825,7 +847,7 @@
             // 
             // textBox6
             // 
-            this.textBox6.Location = new System.Drawing.Point(55, 181);
+            this.textBox6.Location = new System.Drawing.Point(52, 168);
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(171, 20);
             this.textBox6.TabIndex = 17;
@@ -833,7 +855,7 @@
             // 
             // button26
             // 
-            this.button26.Location = new System.Drawing.Point(85, 136);
+            this.button26.Location = new System.Drawing.Point(88, 127);
             this.button26.Name = "button26";
             this.button26.Size = new System.Drawing.Size(75, 23);
             this.button26.TabIndex = 16;
@@ -843,7 +865,7 @@
             // 
             // button25
             // 
-            this.button25.Location = new System.Drawing.Point(6, 136);
+            this.button25.Location = new System.Drawing.Point(7, 127);
             this.button25.Name = "button25";
             this.button25.Size = new System.Drawing.Size(75, 23);
             this.button25.TabIndex = 15;
@@ -853,11 +875,11 @@
             // 
             // button24
             // 
-            this.button24.Location = new System.Drawing.Point(164, 136);
+            this.button24.Location = new System.Drawing.Point(66, 300);
             this.button24.Name = "button24";
-            this.button24.Size = new System.Drawing.Size(75, 23);
+            this.button24.Size = new System.Drawing.Size(120, 31);
             this.button24.TabIndex = 14;
-            this.button24.Text = "Go!";
+            this.button24.Text = "Simple";
             this.button24.UseVisualStyleBackColor = true;
             this.button24.Click += new System.EventHandler(this.button24_Click);
             // 
@@ -1016,6 +1038,53 @@
             this.panel3.Size = new System.Drawing.Size(579, 442);
             this.panel3.TabIndex = 20;
             // 
+            // button31
+            // 
+            this.button31.Location = new System.Drawing.Point(88, 253);
+            this.button31.Name = "button31";
+            this.button31.Size = new System.Drawing.Size(75, 23);
+            this.button31.TabIndex = 25;
+            this.button31.Text = "Scale 2";
+            this.button31.UseVisualStyleBackColor = true;
+            this.button31.Click += new System.EventHandler(this.button31_Click);
+            // 
+            // button32
+            // 
+            this.button32.Location = new System.Drawing.Point(10, 253);
+            this.button32.Name = "button32";
+            this.button32.Size = new System.Drawing.Size(75, 23);
+            this.button32.TabIndex = 24;
+            this.button32.Text = "Scale1";
+            this.button32.UseVisualStyleBackColor = true;
+            this.button32.Click += new System.EventHandler(this.button32_Click);
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(12, 230);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(37, 13);
+            this.label16.TabIndex = 23;
+            this.label16.Text = "Scale:";
+            // 
+            // textBox7
+            // 
+            this.textBox7.Location = new System.Drawing.Point(55, 227);
+            this.textBox7.Name = "textBox7";
+            this.textBox7.Size = new System.Drawing.Size(171, 20);
+            this.textBox7.TabIndex = 22;
+            this.textBox7.Text = "2";
+            // 
+            // button33
+            // 
+            this.button33.Location = new System.Drawing.Point(64, 374);
+            this.button33.Name = "button33";
+            this.button33.Size = new System.Drawing.Size(122, 31);
+            this.button33.TabIndex = 26;
+            this.button33.Text = "invRotationScale";
+            this.button33.UseVisualStyleBackColor = true;
+            this.button33.Click += new System.EventHandler(this.button33_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1154,6 +1223,12 @@
         private System.Windows.Forms.Button button29;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.ToolStripMenuItem сохранитьИзображениеToolStripMenuItem;
+        private System.Windows.Forms.Button button30;
+        private System.Windows.Forms.Button button33;
+        private System.Windows.Forms.Button button31;
+        private System.Windows.Forms.Button button32;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.TextBox textBox7;
     }
 }
 

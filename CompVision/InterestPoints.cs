@@ -12,9 +12,21 @@ namespace CompVision
         public int y;
         public int z;
         public double s; // S(x,y) - значение оператора
-        private double sigmaScale;
-        private double sigmaEffect;
+        public double sigmaScale;
+        public double sigmaEffect;
         public double phiRotate;
+
+        public int X
+        {
+            get => x;
+            set => x = value;
+        }
+
+        public int Y
+        {
+            get => y;
+            set => y = value;
+        }
 
         public double Phi
         {
@@ -37,6 +49,16 @@ namespace CompVision
             this.sigmaScale = sigmaScale;
             this.sigmaEffect = sigmaEffect;
             this.phiRotate = phiRotate;
+        }
+        public Point(Point p)
+        {
+            this.x = p.x;
+            this.y = p.y;
+            this.z = p.z;
+            this.s = p.s;
+            this.sigmaScale = p.sigmaScale;
+            this.sigmaEffect = p.sigmaEffect;
+            this.phiRotate = p.phiRotate;
         }
     };
 
@@ -326,6 +348,183 @@ namespace CompVision
                 }
             }
             return image;
+        }
+
+        public void restorePoints(Pyramid pyramid, List<Point> points)
+        {
+            for (int i = 0; i < points.Count; i++)
+            {
+                Point point = points[i];
+
+                //приводим к оригинальному масштабу
+                double step_W = Convert.ToDouble(pyramid.dogs.ElementAt(0).image.Width) / 
+                    pyramid.dogs.ElementAt(point.z).image.Width;
+
+                double step_H = Convert.ToDouble(pyramid.dogs.ElementAt(0).image.Height) / 
+                    pyramid.dogs.ElementAt(point.z).image.Height;
+
+                point.X = Convert.ToInt32(point.x * step_W);
+                point.Y = Convert.ToInt32(point.y * step_H);
+
+                points[i] = point;
+            }
+        }
+
+        public double lambda(Image image_dx, Image image_dy, int x, int y, int radius)
+        {
+            double A = 0, B = 0, C = 0;
+            for (var i = x - radius; i < x + radius; i++)
+            {
+                for (var j = y - radius; j < y + radius; j++)
+                {
+                    var curA = image_dx.getPixel(i, j);
+                    var curB = image_dy.getPixel(i, j);
+                    A += curA * curA;
+                    B += curA * curB;
+                    C += curB * curB;
+                }
+            }
+            var descreminant = Math.Sqrt((A - C) * (A - C) + 4 * B * B);
+            return Math.Min(Math.Abs((A + C - descreminant) / 2), Math.Abs((A + C + descreminant) / 2));
+        }
+
+        public List<Point> blob(Pyramid pyramid, double threshold, int radius, int pointsCount)
+        {
+            List<Point> points = new List<Point>();
+            Kernel kernel_x = KernelCreator.getSobelX();
+            Kernel kernel_y = KernelCreator.getSobelY();
+            for (int z = 1; z < pyramid.dogs.Count - 1; z++)
+            {
+                Image imageDOG = pyramid.dogs.ElementAt(z).image;
+                Image imageTrue = pyramid.dogs.ElementAt(z).trueImage;
+                Image image_dx = ImageConverter.convolution(imageTrue, kernel_x);
+                Image image_dy = ImageConverter.convolution(imageTrue, kernel_y);
+
+                for (int i = 1; i < imageDOG.Width - 1; i++)
+                {
+                    for (int j = 1; j < imageDOG.Height - 1; j++)
+                    {
+                        if (isExtremum(pyramid, i, j, z))
+                        {
+                            // check harris
+                            double val = pyramid.dogs.ElementAt(z).sigmaScale / pyramid.dogs.ElementAt(0).sigmaScale;
+                            double lambdaMin = lambda(image_dx, image_dy, i, j, (int)Math.Round(radius * val));
+                            if (lambdaMin < threshold)
+                                continue; // skip - haris to low
+
+                            points.Add(new Point(i, j, z, lambdaMin, pyramid.dogs.ElementAt(z).sigmaScale, 
+                                                                                        pyramid.dogs.ElementAt(z).sigmaEffect));
+                        }
+                    }
+                }
+            }
+
+            // Сортируем и оборезаем если нужно
+
+            points.Sort(Compare);
+            //if (points.Count > pointsCount)
+                //points.resize(pointsCount);
+
+            return correctPosition(points, pyramid);
+        }
+
+        public bool isExtremum(Pyramid pyramid, int x, int y, int z)
+        {
+            if (pyramid.dogs.ElementAt(z - 1).octave == pyramid.dogs.ElementAt(z + 1).octave)
+            {
+                bool min = true, max = true;
+                double center = pyramid.dogs.ElementAt(z).image.getPixel(x, y);
+
+                // ищем в 3D
+                for (int i = -1; i <= 1; i++)
+                {
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        for (int k = -1; k <= 1; k++)
+                        {
+                            if (i == 0 && j == 0 && k == 0)
+                            {
+                                continue;   //skip center
+                            }
+                            double value = pyramid.dogs.ElementAt(z + k).image.getPixel(x + i, y + j);
+                            if (value >= center) max = false;
+                            if (value <= center) min = false;
+                        }
+                    }
+                }
+
+                return max || min;
+            }
+            return false;
+        }
+
+        public List<Point> correctPosition(List<Point> points, Pyramid pyramid)
+        {
+            List<Point> result = new List<Point>();
+
+            for (int k = 0; k < points.Count; k++)
+            {
+                Point p = new Point(points[k]);
+
+                bool flagSelect = true;
+                int z_original = pyramid.dogs.ElementAt(p.z).octave;
+                for (int i = 0; i < 10; i++)
+                {
+                    double proizv1_x = (pyramid.dogs.ElementAt(p.z).image.getPixel(p.x + 1, p.y)
+                        - pyramid.dogs.ElementAt(p.z).image.getPixel(p.x - 1, p.y)) / 2;
+
+                    double proizv1_y = (pyramid.dogs.ElementAt(p.z).image.getPixel(p.x, p.y + 1)
+                        - pyramid.dogs.ElementAt(p.z).image.getPixel(p.x, p.y - 1)) / 2;
+
+                    double proizv1_z = (pyramid.dogs.ElementAt(p.z + 1).image.getPixel(p.x, p.y)
+                        - pyramid.dogs.ElementAt(p.z - 1).image.getPixel(p.x, p.y)) / 2;
+
+                    double proizv2_x = 1 / (pyramid.dogs.ElementAt(p.z).image.getPixel(p.x - 1, p.y)
+                        - 2 * pyramid.dogs.ElementAt(p.z).image.getPixel(p.x, p.y) +
+                        pyramid.dogs.ElementAt(p.z).image.getPixel(p.x + 1, p.y));
+
+                    double proizv2_y = 1 / (pyramid.dogs.ElementAt(p.z).image.getPixel(p.x, p.y - 1)
+                        - 2 * pyramid.dogs.ElementAt(p.z).image.getPixel(p.x, p.y)
+                        + pyramid.dogs.ElementAt(p.z).image.getPixel(p.x + 1, p.y + 1));
+
+                    double proizv2_z = 1 / (pyramid.dogs.ElementAt(p.z - 1).image.getPixel(p.x, p.y)
+                        - 2 * pyramid.dogs.ElementAt(p.z).image.getPixel(p.x, p.y)
+                        + pyramid.dogs.ElementAt(p.z + 1).image.getPixel(p.x, p.y));
+
+                    double x_shift_rez = -proizv2_x * proizv1_x;
+                    double y_shift_rez = -proizv2_y * proizv1_y;
+                    double z_shift_rez = -proizv2_z * proizv1_z;
+
+                    if (Math.Abs(x_shift_rez) <= 0.5 && Math.Abs(y_shift_rez) <= 0.5 && Math.Abs(z_shift_rez) <= 0.5)
+                    {
+                        break;
+                    }
+                    if (Math.Abs(x_shift_rez) > 0.5)
+                    {
+                        if (x_shift_rez > 0) p.x++; else p.x--;
+                    }
+                    if (Math.Abs(y_shift_rez) > 0.5 )
+                    {
+                        if (y_shift_rez > 0) p.y++; else p.y--;
+                    }
+                    if (Math.Abs(z_shift_rez) > 0.5)
+                    {
+                        if (z_shift_rez > 0) p.z++; else p.z--;
+                    }
+                    if (pyramid.dogs.ElementAt(p.z).octave != pyramid.dogs.ElementAt(z_original).octave)
+                    {
+                        flagSelect = false;
+                        break;
+                    }
+                }
+                if (flagSelect)
+                {
+                    result.Add(p);
+                }
+
+                //points[k] = p;
+            }
+            return result;
         }
     }
 }

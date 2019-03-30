@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace CompVision
 {
@@ -317,5 +319,78 @@ namespace CompVision
                 Convert.ToSingle(p2.y + r * Math.Sin(p2.Phi)));
             }
         }
+
+        public static Bitmap createImageWithPointsBlob(Image image, List<Point> points)
+        {
+            Bitmap resultImage = image.getOutputImage();
+            Random rnd = new Random();
+            Graphics painter = Graphics.FromImage(resultImage);
+            Pen p;
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                p = new Pen(Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256)), 2);
+                double radius = Math.Sqrt(2) * points[i].sigmaEffect;
+                painter.DrawEllipse(p, new Rectangle(Convert.ToInt32(points[i].x - radius), Convert.ToInt32(points[i].y - radius),
+                    Convert.ToInt32(2 * radius), Convert.ToInt32(2 * radius)));
+                painter.FillRectangle((Brush)Brushes.Red, points[i].x, points[i].y, 3, 3); //draw Point
+            }
+
+            return resultImage;
+        }
+
+        public static Bitmap drawLinesAndCircles(Image image, int firstWidth, List<Vector> similar)
+        {
+            Bitmap resultImage = image.getOutputImage();
+            Random rnd = new Random();
+            Graphics painter = Graphics.FromImage(resultImage);
+            Pen p;
+
+            for (int i = 0; i < similar.Count; i++)
+            {
+                p = new Pen(Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256)), 1);
+                Point p1 = similar[i].first.getInterPoint();
+                Point p2 = similar[i].second.getInterPoint();
+                painter.DrawLine(p, p1.x, p1.y, p2.x + firstWidth, p2.y);
+
+                // Circle 1
+                double radius1 = Math.Sqrt(2) * p1.sigmaEffect;
+                painter.DrawEllipse(p, new Rectangle(Convert.ToInt32(p1.x - radius1),
+                    Convert.ToInt32(p1.y - radius1), Convert.ToInt32(2 * radius1), Convert.ToInt32(2 * radius1)));
+
+                // Circle 2
+                double radius2 = Math.Sqrt(2) * p2.sigmaEffect;
+                painter.DrawEllipse(p, new Rectangle(Convert.ToInt32(p2.x + firstWidth - radius2),
+                    Convert.ToInt32(p2.y - radius2), Convert.ToInt32(2 * radius2), Convert.ToInt32(2 * radius2)));
+
+            }
+            return resultImage;
+        }
+
+        public static Bitmap ResizeImage(Bitmap image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+            return destImage;
+        }
+
+
     }
 }

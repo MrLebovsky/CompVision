@@ -39,21 +39,76 @@ namespace CompVision
     public class Pyramid
     {
         public List<Item> items = new List<Item>();
-        List<Item> dogs = new List<Item>();
+        public List<Item> dogs = new List<Item>();
         public int octaveSize;
         public int ScalesCount;
 
         public Pyramid() { }
 
-        public Pyramid(Image image, int scales, double sigma, double sigmaStart)
+        public Pyramid(Image image, int scales = 7, double sigma = 1.6, double sigmaStart = 1, int t = 0)
         {
             /* Reserve data */
+            int octaveCount = (int)Math.Min(Math.Log(image.Width, 2), Math.Log(image.Height, 2)) - 1;
+
+            /* First image */
+            items.Add(new Item(convultionSeparab(image, KernelCreator.getGauss(getDeltaSigma(sigmaStart, sigma))), 0, 0, sigma, sigma));
+
+            double sigmaScale = sigma;
+            double sigmaEffect = sigma;
+            double octave = 0;
+            Image tmpLastImage = null;
+
+            // While image can be reduced
+            while (octaveCount > 0)
+            {
+                double intervalSigma = Math.Pow(2, 1.0 / scales);
+
+                for (int i = 0; i < scales + 3; i++)
+                {
+                    double sigmaScalePrev = sigmaScale;
+                    sigmaScale = sigma * Math.Pow(intervalSigma, i + 1);
+                    double deltaSigma = getDeltaSigma(sigmaScalePrev, sigmaScale);
+                    sigmaEffect = sigmaScale * Math.Pow(2, octave);
+
+                    items.Add(new Item(convultionSeparab(getLastImage(), KernelCreator.getGauss(deltaSigma)), (int)octave, i + 1,
+                                      sigmaScale, sigmaEffect));
+
+                    if (i == scales - 1)
+                    {
+                        tmpLastImage = ImageConverter.bilinearHalfReduce(getLastImage());
+                    }
+                }
+                octave++;
+                sigmaEffect = sigma * Math.Pow(2, octave);
+                sigmaScale = sigma;
+                octaveCount--;
+
+                items.Add(new Item(tmpLastImage, (int)octave, 0, sigmaScale, sigmaEffect));
+            }
+
+            /* Constructs DOGs */
+            for (int i = 1; i < items.Count; i++)
+            {
+                if (Image.sizeEq(items[i - 1].image, items[i].image))
+                {
+                    Item item = items[i - 1];
+                    Item dog = new Item(items[i].image, items[i].image - item.image,
+                                  item.octave, item.scale, item.sigmaScale, item.sigmaEffect);
+                    dogs.Add(dog);
+                }
+            }
+        }
+
+        /*
+        public Pyramid(Image image, int scales, double sigma, double sigmaStart)
+        {
+            /* Reserve data 
             int octaveCount = (int)Math.Min(Math.Log(image.Width, 2), Math.Log(image.Height, 2)) - 1;
             octaveSize = octaveCount;
             ScalesCount = scales;
             //items.reserve(octaveCount * scales);
 
-            /* First image */
+            /* First image 
             items.Add(new Item(convultionSeparab(image, KernelCreator.getGauss(getDeltaSigma(sigmaStart, sigma))), 0, 0, sigma, sigma));
 
             double sigmaScale = sigma;
@@ -91,7 +146,7 @@ namespace CompVision
                 //items.Add(new Item(tmpLastImage, (int)octave, 0, sigmaScale, sigmaEffect));
             }
 
-            /* Constructs DOGs */
+            /* Constructs DOGs 
             for (int i = 1; i < items.Count; i++)
             {
                 if (Image.sizeEq(items[i - 1].image, items[i].image))
@@ -103,6 +158,7 @@ namespace CompVision
                 }
             }
         }
+    */
 
         public static Image convultionSeparab(Image image, Kernel gaussLine)
         {

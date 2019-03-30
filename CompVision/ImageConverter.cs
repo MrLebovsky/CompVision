@@ -193,5 +193,30 @@ namespace CompVision
             g.DrawImage(input, new System.Drawing.Point(0, 0));
             return result;
         }
+
+        public static Image bilinearHalfReduce(Image image)
+        {
+            Image resultImage = new Image(image.Width / 2, image.Height / 2, image._EdgeEffect);
+            double x_koef = image.Width / (image.Width / 2);
+            double y_koef = image.Height / (image.Height / 2);
+
+            for (var i = 0; i < resultImage.Width; i++)
+            {
+                for (var j = 0; j < resultImage.Height; j++)
+                {
+
+                    int x = (int) x_koef * i;
+                    int y = (int) y_koef * j;
+                    double x_ost = (x_koef * i) - x;
+                    double y_ost = (y_koef * j) - y;
+                    double p1 = image.getPixel(x, y) * (1 - x_ost) * (1 - y_ost);
+                    double p2 = image.getPixel(x + 1, y) * (x_ost) * (1 - y_ost);
+                    double p3 = image.getPixel(x, y + 1) * (1 - x_ost) * (y_ost);
+                    double p4 = image.getPixel(x + 1, y + 1) * (x_ost * y_ost);
+                    resultImage.setPixel(i, j, p1 + p2 + p3 + p4);
+                }
+            }
+            return resultImage;
+        }
     }
 }
