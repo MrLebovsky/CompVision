@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Windows.Forms;
 
 namespace CompVision
 {
@@ -329,11 +330,11 @@ namespace CompVision
 
             for (int i = 0; i < points.Count; i++)
             {
-                p = new Pen(Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256)), 2);
+                p = new Pen(Color.Red, 2);
                 double radius = Math.Sqrt(2) * points[i].sigmaEffect;
                 painter.DrawEllipse(p, new Rectangle(Convert.ToInt32(points[i].x - radius), Convert.ToInt32(points[i].y - radius),
                     Convert.ToInt32(2 * radius), Convert.ToInt32(2 * radius)));
-                painter.FillRectangle((Brush)Brushes.Red, points[i].x, points[i].y, 3, 3); //draw Point
+                //painter.FillRectangle(Brushes.Red, points[i].x, points[i].y, 2, 2); //draw Point
             }
 
             return resultImage;
@@ -391,6 +392,20 @@ namespace CompVision
             return destImage;
         }
 
+        public static Bitmap AffinTransform(Bitmap image)
+        {
+            image.RotateFlip(RotateFlipType.Rotate180FlipY);
+            var destImage = new Bitmap(image.Width, image.Height);            
 
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                System.Drawing.Point[] destinationPoints = {
+                    new System.Drawing.Point(image.Width + 10, 0),                  
+                    new System.Drawing.Point(0, 10),  
+                    new System.Drawing.Point(image.Width, image.Height - 10)};  
+                graphics.DrawImage(image, destinationPoints);
+            }
+            return destImage;
+        }
     }
 }

@@ -404,8 +404,11 @@ namespace CompVision
                 {
                     for (int j = 1; j < imageDOG.Height - 1; j++)
                     {
-                        if (isExtremum(pyramid, i, j, z))
+                        if (isExtremum(pyramid, i, j, z)) //проверим, минимум или максимум в 3D
                         {
+                            if (pyramid.dogs.ElementAt(z).image.getPixel(i, j) < 0.0003)
+                                continue;
+
                             // check harris
                             double val = pyramid.dogs.ElementAt(z).sigmaScale / pyramid.dogs.ElementAt(0).sigmaScale;
                             double lambdaMin = lambda(image_dx, image_dy, i, j, (int)Math.Round(radius * val));
@@ -420,12 +423,9 @@ namespace CompVision
             }
 
             // Сортируем и оборезаем если нужно
-
             points.Sort(Compare);
-            //if (points.Count > pointsCount)
-                //points.resize(pointsCount);
-
-            return correctPosition(points, pyramid);
+            //return correctPosition(points, pyramid);
+            return points;
         }
 
         public bool isExtremum(Pyramid pyramid, int x, int y, int z)

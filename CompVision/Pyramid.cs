@@ -227,6 +227,21 @@ namespace CompVision
                 }
             }
         }
+
+        public void SaveDogsToFile(String path)
+        {
+            if (dogs.Count > 0)
+            {
+                for (int i = 0; i < dogs.Count - 1; i++)
+                {
+                    String fullPath = path + "\\Octave " + dogs[i].octave.ToString() + " Scale " + dogs[i].scale.ToString()
+                        + " SigmaEffect " + dogs[i].sigmaEffect.ToString() + " "
+                        + ".jpeg";
+
+                    dogs[i].image.getOutputImage().Save(fullPath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+        }
     }
     
 }

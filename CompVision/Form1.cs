@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Threading;
+
 
 namespace CompVision
 {
@@ -338,6 +338,9 @@ namespace CompVision
 
             First = new Image(new Bitmap(filePath), edgeEffect);
             SetImage(First);
+            textBox8.Text = Convert.ToString(First.Width);
+            textBox9.Text = Convert.ToString(First.Height);
+
         }
 
         private void button26_Click(object sender, EventArgs e)
@@ -349,6 +352,8 @@ namespace CompVision
 
             Second = new Image(new Bitmap(filePath), edgeEffect);
             SetImage(Second);
+            textBox8.Text = Convert.ToString(Second.Width);
+            textBox9.Text = Convert.ToString(Second.Height);
         }
 
         private void button27_Click(object sender, EventArgs e)
@@ -492,13 +497,98 @@ namespace CompVision
             Descriptor[] descriptors2 = DescriptorCreator.getDescriptorsInvRotationScale(pyramid_2, SecondPoints, (int)numericUpDown6.Value,
                 (int)numericUpDown4.Value, (int)numericUpDown5.Value);
 
-            Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints),
-                Image.createImageWithPoints(SecondImage, SecondPoints));
+            //Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints),
+            //Image.createImageWithPoints(SecondImage, SecondPoints));
+
+            Bitmap res = Image.glueImages(FirstImage.getOutputImage(), SecondImage.getOutputImage());
 
             List<Vector> similar = DescriptorCreator.findSimilar(descriptors1, descriptors2, (double)numericUpDown7.Value);         
 
             this.pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
-            pictureBox1.Image = Image.drawLinesAndCircles(new Image(res, edgeEffect), First.Width, similar); ;
+            pictureBox1.Image = Image.drawLinesAndCircles(new Image(res, edgeEffect), First.Width, similar);
+        }
+
+        private void button34_Click(object sender, EventArgs e)
+        {
+            String path = "";
+            using (var dialog = new FolderBrowserDialog())
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    path = dialog.SelectedPath;
+                    pyramid.SaveDogsToFile(path);
+                }
+        }
+
+        private void button35_Click(object sender, EventArgs e)
+        {
+           First = new Image(Image.AffinTransform(First.getOutputImage()), edgeEffect);
+           SetImage(First);
+        }
+
+        private void button36_Click(object sender, EventArgs e)
+        {
+            Second = new Image(Image.AffinTransform(Second.getOutputImage()), edgeEffect);
+            SetImage(Second);
+        }
+
+        private void button37_Click(object sender, EventArgs e)
+        {
+            interestPoints = new InterestPoints();
+            Image FirstImage = new Image(First);
+            FirstImage.normolizePixels();
+            Pyramid pyramid_1 = new Pyramid(FirstImage);
+
+            List<Point> FirstPoints = interestPoints.blob(pyramid_1, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors1 = DescriptorCreator.getDescriptorsInvRotationScaleAfinn(pyramid_1, FirstPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+            //-------------------------------------------------------------------///
+            Image SecondImage = new Image(Second);
+            SecondImage.normolizePixels();
+
+            Pyramid pyramid_2 = new Pyramid(SecondImage);
+
+            List<Point> SecondPoints = interestPoints.blob(pyramid_2, (double)numericUpDown1.Value,
+                            (int)numericUpDown2.Value,
+                            (int)numericUpDown3.Value);
+
+            Descriptor[] descriptors2 = DescriptorCreator.getDescriptorsInvRotationScaleAfinn(pyramid_2, SecondPoints, (int)numericUpDown6.Value,
+                (int)numericUpDown4.Value, (int)numericUpDown5.Value);
+
+            //Bitmap res = Image.glueImages(Image.createImageWithPoints(FirstImage, FirstPoints),
+            //Image.createImageWithPoints(SecondImage, SecondPoints));
+
+            Bitmap res = Image.glueImages(FirstImage.getOutputImage(), SecondImage.getOutputImage());
+
+            List<Vector> similar = DescriptorCreator.findSimilar(descriptors1, descriptors2, (double)numericUpDown7.Value);
+
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+            pictureBox1.Image = Image.drawLinesAndCircles(new Image(res, edgeEffect), First.Width, similar);
+        }
+
+        private void button38_Click(object sender, EventArgs e)
+        {
+            int width = Convert.ToInt32(textBox8.Text);
+            int height = Convert.ToInt32(textBox9.Text);
+            Bitmap resized = Image.ResizeImage(First.getOutputImage(), width, height);
+
+            First = new Image(resized, edgeEffect);
+
+            SetImage(First);
+        }
+
+        private void button39_Click(object sender, EventArgs e)
+        {
+            int width = Convert.ToInt32(textBox8.Text);
+            int height = Convert.ToInt32(textBox9.Text);
+            Bitmap resized = Image.ResizeImage(Second.getOutputImage(), width, height);
+
+            Second = new Image(resized, edgeEffect);
+
+            SetImage(Second);
         }
     }
 }

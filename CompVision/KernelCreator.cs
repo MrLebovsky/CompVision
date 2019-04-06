@@ -142,7 +142,12 @@ namespace CompVision
                 * (i - radius / 2) + (j - radius / 2) * (j - radius / 2)) * (-1.0 / (2 * sigma * sigma)));
         }
 
-        public static Kernel getGaussDoubleDim(int width, int height, double sigma)
+        public static double getGaussValue(int i, int j, double sigma, int radius) {
+            return (1.0 / (2 * sigma* sigma * Math.PI)) 
+                * Math.Exp(((i - radius) * (i - radius) + (j - radius) * (j - radius)) * (-1.0 / (2 * sigma* sigma)));
+    }
+
+    public static Kernel getGaussDoubleDim(int width, int height, double sigma)
         {
             // Tmp vars
             double sum = 0.0;

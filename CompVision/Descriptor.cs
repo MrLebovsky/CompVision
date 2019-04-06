@@ -433,6 +433,154 @@ namespace CompVision
             }
             return descriptors;
         }
+
+
+        public static Descriptor[] getDescriptorsInvRotationScaleAfinn(Pyramid pyramid, List<Point> points,
+         int _radius, int basketCount, int barCharCount)
+        {
+            var sigma = 20;
+            var sigma0 = pyramid.dogs[0].sigmaScale;
+            var sector = 2 * Math.PI / basketCount;
+            var halfSector = Math.PI / basketCount;
+            var barCharCountInLine = (barCharCount / 4);
+
+            List<Image> images_dx = new List<Image>();
+            List<Image> images_dy = new List<Image>();
+
+            // Ищем производные заранее
+            for (int i = 0; i < pyramid.dogs.Count; i++)
+            {
+                Image imageTrue = pyramid.dogs[i].trueImage;
+                images_dx.Add(ImageConverter.convolution(imageTrue, KernelCreator.getSobelX()));
+                images_dy.Add(ImageConverter.convolution(imageTrue, KernelCreator.getSobelY()));
+            }
+
+            Descriptor[] descriptors = new Descriptor[points.Count];
+
+            for (int k = 0; k < points.Count; k++)
+            {
+                descriptors[k] = new Descriptor(barCharCount * basketCount, points[k]);
+
+                double scale = (points[k].sigmaScale / sigma0);
+                int radius = _radius * (int)scale;
+                int dimension = 2 * radius;
+                int barCharStep = dimension / (barCharCount / 4);
+                Image image_dx = images_dx[points[k].z];
+                Image image_dy = images_dy[points[k].z];
+                Kernel gaussDoubleDim = KernelCreator.getGaussDoubleDim(dimension, dimension, sigma * scale);
+                // Ориентация точки
+                var peaks = getPointOrientation(image_dx, image_dy, points[k], sigma, radius);
+
+                foreach (var phiRotate in peaks)
+                {
+                    Point p = points[k];
+                    p.Phi = phiRotate;
+                    points[k] = p;
+
+                    for (var i = 0; i < dimension; i++)
+                    {
+                        for (var j = 1; j < dimension; j++)
+                        {
+                            // координаты
+                            var coord_X = i - radius + points[k].x;
+                            var coord_Y = j - radius + points[k].y;
+
+                            // градиент
+                            var gradient_X = image_dx.getPixel(coord_X, coord_Y);
+                            var gradient_Y = image_dy.getPixel(coord_X, coord_Y);
+
+                            // получаем значение(домноженное на Гаусса) и угол
+                            var value = getGradientValue(gradient_X, gradient_Y) * gaussDoubleDim.getkernelAt(i, j);
+                            //                    var value = getGradientValue(gradient_X, gradient_Y)  * KernelCreator.getGaussValue(i, j, sigma * scale, radius);
+                            var phi = getGradientDirection(gradient_X, gradient_Y) + 2 * Math.PI - phiRotate;
+                            phi = (phi % 2 * Math.PI);  // Shift
+
+                            // получаем индекс корзины в которую входит phi и смежную с ней
+                            int firstBasketIndex = (int)Math.Floor(phi / sector);
+                            int secondBasketIndex = Convert.ToInt32(Math.Floor((phi - halfSector) / sector) + basketCount) % basketCount;
+
+                            // вычисляем центр
+                            var mainBasketPhi = firstBasketIndex * sector + halfSector;
+
+                            // распределяем L(value)
+                            var mainBasketValue = (1 - (Math.Abs(phi - mainBasketPhi) / sector)) * value;
+                            var sideBasketValue = value - mainBasketValue;
+
+                            // вычисляем индекс куда записывать значения
+                            int i_Rotate = (int)Math.Round((i - radius) * Math.Cos(phiRotate) + (j - radius) * Math.Sin(phiRotate));
+                            int j_Rotate = (int)Math.Round(-(i - radius) * Math.Sin(phiRotate) + (j - radius) * Math.Cos(phiRotate));
+
+                            // отбрасываем
+                            if (i_Rotate < -radius || j_Rotate < -radius || i_Rotate >= radius || j_Rotate >= radius)
+                            {
+                                continue;
+                            }
+
+                            // координаты точки в дискрипторе
+                            int true_i = (i_Rotate + radius);
+                            int true_j = (j_Rotate + radius);
+
+                            int half = (int)barCharStep / 2;
+
+                            // отнимаем половинку для поиска ближайших 4 гистограмм
+                            int disk_i = (true_i - half + dimension) % dimension;
+                            int disk_j = (true_j - half + dimension) % dimension;
+
+                            // i j левой верхней гистограммы
+                            int gist_i = disk_i / (int)barCharStep;
+                            int gist_j = disk_j / (int)barCharStep;
+
+                            // индексы 4-ех гистограмм
+                            int[] gist = new int[4];
+                            gist[0] = gist_i * barCharCountInLine + gist_j;
+                            gist[1] = gist_i + 1 >= barCharCountInLine ? -1 : (gist_i + 1) * barCharCountInLine + gist_j;
+                            gist[2] = gist_j + 1 >= barCharCountInLine ? -1 : gist_i * barCharCountInLine + (gist_j + 1);
+                            gist[3] = (gist_i + 1 >= barCharCountInLine || gist_j + 1 >= barCharCountInLine) ? -1 :
+                                                                                    (gist_i + 1) * barCharCountInLine + (gist_j + 1);
+
+                            // добиваемся чтоб координаты были между 4 гистограммами
+                            double tmp_i = ((true_i + barCharStep / 2) % barCharStep);
+                            double tmp_j = ((true_j + barCharStep / 2) % barCharStep);
+
+                            // считаем веса  по x и y
+                            double wt_X = (barCharStep - tmp_i) / barCharStep;
+                            double wt_Y = (barCharStep - tmp_j) / barCharStep;
+
+                            // перемножаем для 4 гистограмм
+                            double[] wt = new double[4]{
+                                wt_X * wt_Y, (1 - wt_X) * wt_Y,
+                                    wt_X *(1 - wt_Y), (1 - wt_X) * (1 - wt_Y)};
+
+                            // считаем индексы и записываем значения
+                            for (int w = 0; w < 4; w++)
+                            {
+                                if (gist[w] != -1)
+                                {
+                                    int index = gist[w] * basketCount;
+                                    descriptors[k].data[index + firstBasketIndex] += wt[w] * mainBasketValue;
+                                    descriptors[k].data[index + secondBasketIndex] += wt[w] * sideBasketValue;
+                                }
+                            }
+                        }
+                    }
+                    descriptors[k].normalize();
+                    descriptors[k].clampData(0, 0.2);
+                    descriptors[k].normalize();
+                }
+            }
+
+            for (int i = 0; i < descriptors.Length; i++)
+            {
+                //приводим к оригинальному масштабу
+                Point interPoint = descriptors[i].getInterPoint();
+                double step_W = Convert.ToDouble(pyramid.dogs[0].image.Width) / pyramid.dogs[interPoint.z].image.Width;
+                double step_H = Convert.ToDouble(pyramid.dogs[0].image.Height) / pyramid.dogs[interPoint.z].image.Height;
+                descriptors[i].setPointXY((int)Math.Round(interPoint.x * step_W), (int)Math.Round(interPoint.y * step_H));
+            }
+            return descriptors;
+        }
+
+
     }
 
     public class Descriptor
